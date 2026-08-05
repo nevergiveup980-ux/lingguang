@@ -1,27 +1,17 @@
-# LINGGUANG Health OS Integrated 1.2
+# LINGGUANG Health OS — Mobile GitHub Upload 1.3
 
-This version keeps the original dashboard and top navigation as the system home.
+This package is optimized for uploading from an iPhone.
 
-## Integrated workflow
-Dashboard → AI Care → AI Intake → Patient Assessment → Clinical Summary → Clinical Workspace
+## Upload these four files to the root of one GitHub repository
+- `index.html`
+- `app.js`
+- `styles.css`
+- `README.md`
 
-## Working features
-- Original navigation dashboard preserved
-- Booking add, confirm/pending, and delete
-- Patient list created from completed intake
-- Five-step intake with automatic local draft saving
-- Structured clinical summaries
-- Transfer summary into clinical notes
-- Clinical-note saving
-- Health Analysis based on check-ins
-- Remote Care daily check-ins
-- Follow-up creation and completion
-- Risk Review flags
-- Health Journey display
-- Clinic statistics
-- Browser local storage
+There is no outer project folder inside the ZIP and no nested source folders to upload.
 
-## Open
-Unzip and open `index.html`.
+## GitHub Pages
+After uploading, open repository **Settings → Pages**, choose **Deploy from a branch**, select `main` and `/ (root)`, then save.
 
-This is a local working edition. Data remains in the browser/device where it is opened. Cloud sync, login, SMS/email, and live GPT API are not yet connected.
+## Current technical boundary
+This is a browser-based working build. It uses local browser storage. Cloud accounts, Supabase, live GPT API, SMS/email, and production medical compliance are not yet connected.
