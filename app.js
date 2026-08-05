@@ -193,7 +193,7 @@ function menuCard(icon,title,text,route,extra=''){
   </button>`;
 }
 function backBar(parent,label='Back'){
-  return `<div class="back-bar"><button class="button secondary" data-route="${parent}">← ${label}</button></div>`;
+  return `<div class="back-bar"><button type="button" class="button secondary back-button" onclick="LINGGUANG_NAV.goBack('${parent.replace(/'/g,"\\'")}')">← ${label}</button></div>`;
 }
 function selectedPatient(){
   const id=routeParams.get('patient');
@@ -492,7 +492,10 @@ function createAppShell() {
       </aside>
       <main class="workspace">
         <header class="workspace-header">
-          <div><h1 id="page-title"></h1><p id="page-subtitle"></p></div>
+          <div class="header-title-row">
+            <button type="button" id="global-back-button" class="global-back-button" aria-label="Back">←</button>
+            <div><h1 id="page-title"></h1><p id="page-subtitle"></p></div>
+          </div>
           <div class="avatar">DL</div>
         </header>
         <section id="page-root" aria-live="polite"></section>
@@ -553,6 +556,64 @@ function currentRouteInfo(){
 }
 function currentRoute(){return currentRouteInfo().route;}
 
+
+function fallbackParentRoute(route,params){
+  const patient=params.get('patient');
+  const patientDetail=patient?`patient-detail?patient=${encodeURIComponent(patient)}`:'patient-list';
+  const map={
+    today:null,
+    patients:'today',
+    'patient-new':'patients',
+    'patient-list':'patients',
+    'patient-archived':'patients',
+    'patient-detail':'patient-list',
+    'patient-basic':patientDetail,
+    'patient-bookings':patientDetail,
+    'patient-clinical':patientDetail,
+    'patient-ai':patientDetail,
+    'patient-journey':patientDetail,
+    'patient-remote':patientDetail,
+    'patient-documents':patientDetail,
+    'document-placeholder':patientDetail,
+    booking:'today',
+    'booking-new':'booking',
+    'booking-pending':'booking',
+    'booking-confirmed':'booking',
+    'booking-history':'booking',
+    clinical:'today',
+    'clinical-new':'clinical',
+    'clinical-notes':'clinical',
+    'clinical-today':'clinical',
+    'ai-care':'today',
+    'ai-intake':'ai-care',
+    intake:'ai-intake',
+    'ai-conversation':'ai-intake',
+    'clinical-summary':'ai-care',
+    'health-analysis':'ai-care',
+    'remote-care':'ai-care',
+    'follow-up':'ai-care',
+    'risk-review':'ai-care',
+    'health-journey':'today',
+    clinic:'today',
+    settings:'today',
+    'settings-language':'settings',
+    'settings-privacy':'settings',
+    'settings-about':'settings'
+  };
+  return map[route]??'today';
+}
+
+window.LINGGUANG_NAV={
+  go(route){
+    if(!route)return;
+    location.hash=`#/${route}`;
+  },
+  goBack(fallback='today'){
+    // Use the explicit parent route so mobile Safari and GitHub Pages behave consistently.
+    location.hash=`#/${fallback||'today'}`;
+  }
+};
+
 async function render(){
   const info=currentRouteInfo();
   routeParams=info.params;
@@ -563,6 +624,12 @@ async function render(){
   document.querySelector('#page-subtitle').textContent=result.subtitle;
   document.querySelector('#page-root').innerHTML=result.html;
   document.querySelectorAll('[data-route]').forEach(btn=>btn.classList.toggle('active',btn.dataset.route.split('?')[0]===route));
+  const globalBack=document.querySelector('#global-back-button');
+  const parent=fallbackParentRoute(route,info.params);
+  if(globalBack){
+    globalBack.hidden=!parent;
+    globalBack.onclick=()=>LINGGUANG_NAV.goBack(parent||'today');
+  }
   result.mount?.();
   window.scrollTo({top:0,behavior:'instant'});
 }
@@ -571,7 +638,10 @@ const router={
   start(){
     document.addEventListener('click',event=>{
       const trigger=event.target.closest('[data-route]');
-      if(trigger)location.hash=`#/${trigger.dataset.route}`;
+      if(trigger){
+        event.preventDefault();
+        LINGGUANG_NAV.go(trigger.dataset.route);
+      }
     });
     addEventListener('hashchange',render);
     render();

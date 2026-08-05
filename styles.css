@@ -14,3 +14,14 @@
 /* Navigation Edition Build 001 */
 .menu-list{display:grid;gap:10px}.menu-entry{width:100%;display:grid;grid-template-columns:44px 1fr 24px;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:17px;padding:14px;background:#fff;color:var(--text);transition:.18s}.menu-entry:hover,.menu-entry:active{border-color:#8fc8b3;background:var(--soft);transform:translateY(-1px)}.menu-icon{width:42px;height:42px;border-radius:13px;background:var(--soft);display:grid;place-items:center;font-size:21px}.menu-copy strong,.menu-copy small{display:block}.menu-copy small{margin-top:4px;color:var(--muted);font-weight:500;line-height:1.35}.menu-arrow{font-size:28px;color:var(--green);text-align:right}.back-bar{margin-bottom:12px}.record-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}.record-row:last-child{border-bottom:0}.record-row small{display:block;color:var(--muted);margin-top:5px}.timeline-item{border-left:3px solid var(--green);padding:3px 0 18px 16px;margin-left:5px}.timeline-item small{display:block;color:var(--muted);margin-top:5px}.patient-profile-hero{margin-bottom:16px}
 @media(max-width:560px){.menu-entry{grid-template-columns:40px 1fr 20px;padding:13px}.menu-icon{width:38px;height:38px}.record-row{align-items:flex-start;flex-direction:column}.record-row .button{width:100%}}
+
+
+/* Build 001.1 — reliable back navigation */
+.header-title-row{display:flex;align-items:center;gap:12px;min-width:0}
+.global-back-button{width:42px;height:42px;flex:0 0 42px;border:0;border-radius:14px;background:#edf2f0;color:#244b40;font-size:24px;font-weight:900;cursor:pointer}
+.global-back-button[hidden]{display:none}
+.back-button{cursor:pointer;position:relative;z-index:2}
+@media(max-width:900px){
+  .workspace-header{align-items:flex-start}
+  .global-back-button{width:44px;height:44px;flex-basis:44px}
+}
