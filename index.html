@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en-CA">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LINGGUANG 灵光 · 智能预约</title>
+<title>LINGGUANG · Smart Booking</title>
 <style>
 :root{
   --bg:#f5f8f6;
@@ -100,63 +100,63 @@ footer{text-align:center;color:#829087;font-size:12px;padding:16px}
   <header class="topbar">
     <div class="brand">
       <div class="logo">LG</div>
-      <div><h1>LINGGUANG 灵光</h1><p>医疗保健与长期健康管理</p></div>
+      <div><h1>LINGGUANG</h1><p>Smart Health & Wellness Management</p></div>
     </div>
     <nav class="nav">
-      <button class="active" onclick="showHome()">预约</button>
-      <button onclick="showClinic()">诊所审核台</button>
-      <button onclick="alert('患者健康档案模块将在下一版开放')">健康档案</button>
+      <button class="active" onclick="showHome()">Booking</button>
+      <button onclick="showClinic()">Clinic Review</button>
+      <button onclick="alert('The Patient Portal is planned for the next release.')">Patient Portal</button><button onclick="alert('English is the default language. Chinese and French can be added next.')">EN-CA</button>
     </nav>
   </header>
 
   <main id="home">
     <section class="hero">
       <div class="hero-card">
-        <div class="eyebrow">SMART BOOKING · REQUEST REVIEW</div>
-        <h2>选择最适合您的<br>预约方式</h2>
-        <p>常规复诊可以直接确认；初诊、复杂情况或特殊时间需求可先提交申请，由诊所审核并协助安排。</p>
+        <div class="eyebrow">SMART BOOKING · APPOINTMENT REQUEST</div>
+        <h2>Choose the appointment option<br>that works best for you</h2>
+        <p>Book routine visits instantly, or submit a request when you are a new patient, need a special time, or would like the clinic to review your needs first.</p>
         <div class="mode-row">
           <div class="mode selected" id="smartMode" onclick="selectMode('smart')">
-            <div class="icon">⚡</div><h3>智能预约</h3>
-            <p>查看可用时间，符合条件后立即确认。适合常规复诊和固定服务项目。</p>
+            <div class="icon">⚡</div><h3>Smart Booking</h3>
+            <p>Choose an available time and receive immediate confirmation. Best for returning patients and routine visits.</p>
           </div>
           <div class="mode" id="requestMode" onclick="selectMode('request')">
-            <div class="icon">📝</div><h3>申请预约</h3>
-            <p>提交时间偏好与基本情况，由诊所审核、建议时间并完成确认。</p>
+            <div class="icon">📝</div><h3>Appointment Request</h3>
+            <p>Share your preferred time and basic information. The clinic will review your request and confirm or suggest another time.</p>
           </div>
         </div>
       </div>
       <aside class="side-card">
-        <h3>今天的预约概况</h3>
-        <div class="stat"><span>可直接预约时段</span><b>8</b></div>
-        <div class="stat"><span>待审核申请</span><b>3</b></div>
-        <div class="stat"><span>平均确认时间</span><span class="pill">约 2 小时</span></div>
-        <div class="notice">紧急或危及生命的情况不应通过本系统预约，请立即联系当地急救服务。</div>
+        <h3>Today at a Glance</h3>
+        <div class="stat"><span>Instant Booking Times</span><b>8</b></div>
+        <div class="stat"><span>Requests Awaiting Review</span><b>3</b></div>
+        <div class="stat"><span>Typical Reply Time</span><span class="pill">About 2 Hours</span></div>
+        <div class="notice">This service is not for emergencies. If you may be experiencing a medical emergency, contact local emergency services immediately.</div>
       </aside>
     </section>
 
     <section class="panel" id="bookingPanel">
       <div class="stepper"><div class="step on"></div><div class="step"></div><div class="step"></div></div>
       <div id="step1">
-        <h2 id="formTitle">智能预约</h2>
+        <h2 id="formTitle">Smart Booking</h2>
         <div class="grid">
-          <div class="field"><label>患者类型</label><select id="patientType"><option>复诊患者</option><option>新患者</option></select></div>
-          <div class="field"><label>服务项目</label><select id="service"><option>针灸复诊 · 60分钟</option><option>综合健康咨询 · 45分钟</option><option>疼痛管理评估 · 75分钟</option><option>不确定，需要诊所建议</option></select></div>
-          <div class="field"><label>医生</label><select id="doctor"><option>任何可用医生</option><option>Dr. Ling</option><option>Dr. Chen</option></select></div>
-          <div class="field"><label>主要关注</label><select id="concern"><option>常规复诊</option><option>肩颈或腰背不适</option><option>睡眠与疲劳</option><option>消化与饮食</option><option>其他或较复杂情况</option></select></div>
-          <div class="field full"><label>简要说明</label><textarea id="notes" placeholder="例如：上次治疗后改善情况、希望预约的原因等"></textarea></div>
+          <div class="field"><label>Patient Type</label><select id="patientType"><option>Returning Patient</option><option>New Patient</option></select></div>
+          <div class="field"><label>Service</label><select id="service"><option>Follow-up Acupuncture · 60 Minutes</option><option>Wellness Consultation · 45 Minutes</option><option>Pain Assessment · 75 Minutes</option><option>Not Sure — Please Advise</option></select></div>
+          <div class="field"><label>Practitioner</label><select id="doctor"><option>No Preference</option><option>Dr. Ling</option><option>Dr. Chen</option></select></div>
+          <div class="field"><label>Main Concern</label><select id="concern"><option>Routine Follow-up</option><option>Neck, Shoulder or Back Discomfort</option><option>Sleep and Fatigue</option><option>Digestive Wellness</option><option>Other or More Complex Concern</option></select></div>
+          <div class="field full"><label>Brief Notes</label><textarea id="notes" placeholder="For example: how you felt after your last visit, or what you would like help with today."></textarea></div>
         </div>
-        <div class="actions"><span></span><button class="btn primary" onclick="nextStep()">继续</button></div>
+        <div class="actions"><span></span><button class="btn primary" onclick="nextStep()">Continue</button></div>
       </div>
 
       <div id="step2" class="hidden">
-        <h2 id="timeTitle">选择预约时间</h2>
+        <h2 id="timeTitle">Choose a Date and Time</h2>
         <div class="grid">
-          <div class="field"><label>首选日期</label><input id="date" type="date" /></div>
-          <div class="field request-only hidden"><label>可接受的时间范围</label><select id="range"><option>上午</option><option>下午</option><option>傍晚</option><option>全天均可</option></select></div>
+          <div class="field"><label>Preferred Date</label><input id="date" type="date" /></div>
+          <div class="field request-only hidden"><label>Preferred Time</label><select id="range"><option>Morning</option><option>Afternoon</option><option>Evening</option><option>No Preference</option></select></div>
         </div>
         <div id="smartSlots">
-          <label>可用时间</label>
+          <label>Available Times</label>
           <div class="calendar">
             <div class="slot" onclick="pickSlot(this)">9:00 AM</div>
             <div class="slot busy">10:00 AM</div>
@@ -169,24 +169,24 @@ footer{text-align:center;color:#829087;font-size:12px;padding:16px}
           </div>
         </div>
         <div class="request-only hidden">
-          <div class="field full" style="margin-top:16px"><label>备选日期或说明</label><textarea id="alternatives" placeholder="例如：周二或周四下午均可；如无空位可接受下周。"></textarea></div>
+          <div class="field full" style="margin-top:16px"><label>Alternative Dates or Scheduling Notes</label><textarea id="alternatives" placeholder="Example: Tuesday or Thursday afternoon; next week is also acceptable."></textarea></div>
         </div>
-        <div class="actions"><button class="btn secondary" onclick="prevStep()">返回</button><button class="btn primary" onclick="review()">查看确认</button></div>
+        <div class="actions"><button class="btn secondary" onclick="prevStep()">Back</button><button class="btn primary" onclick="review()">Review</button></div>
       </div>
 
       <div id="step3" class="hidden">
-        <h2>确认信息</h2>
+        <h2>Review Your Information</h2>
         <div class="summary" id="reviewBox"></div>
-        <div id="requestNotice" class="notice hidden">提交后属于预约申请，尚未占用正式时段。诊所审核并获得双方确认后，才会进入正式日历。</div>
-        <div class="actions"><button class="btn secondary" onclick="backToTime()">返回修改</button><button class="btn primary" onclick="submitBooking()">确认提交</button></div>
+        <div id="requestNotice" class="notice hidden">This is an appointment request and does not hold a confirmed time yet. The clinic will review it and contact you with confirmation or another suggested time.</div>
+        <div class="actions"><button class="btn secondary" onclick="backToTime()">Back to Edit</button><button class="btn primary" onclick="submitBooking()">Confirm and Submit</button></div>
       </div>
 
       <div id="result" class="result hidden">
         <div class="check">✓</div>
-        <h2 id="resultTitle">预约成功</h2>
+        <h2 id="resultTitle">Appointment Confirmed</h2>
         <p id="resultText"></p>
         <div class="summary" id="resultSummary"></div>
-        <div class="actions" style="justify-content:center"><button class="btn ghost" onclick="resetAll()">返回预约首页</button></div>
+        <div class="actions" style="justify-content:center"><button class="btn ghost" onclick="resetAll()">Return to Booking</button></div>
       </div>
     </section>
   </main>
@@ -194,26 +194,26 @@ footer{text-align:center;color:#829087;font-size:12px;padding:16px}
   <main id="clinic" class="hidden">
     <section class="panel" style="margin-top:24px">
       <div class="eyebrow">CLINIC REVIEW DESK</div>
-      <h2>预约申请审核台</h2>
-      <p style="color:var(--muted)">查看患者申请、补充资料并提出合适时间。只有确认后的申请才进入正式日历。</p>
+      <h2>Appointment Request Review</h2>
+      <p style="color:var(--muted)">Review requests, ask for more information, and suggest an appropriate appointment time. Only confirmed requests are added to the clinic calendar.</p>
       <div class="dashboard">
         <div class="queue">
-          <h4>待审核申请</h4>
-          <div class="request"><strong>新患者 · 疼痛管理评估</strong><small>希望周四下午 · Dr. Ling</small><br><span class="badge">需要审核</span></div>
-          <div class="request"><strong>复诊患者 · 特殊时间申请</strong><small>工作日 6:00 PM 后均可</small><br><span class="badge">等待建议时间</span></div>
-          <div class="request"><strong>新患者 · 不确定服务项目</strong><small>主要关注：睡眠与疲劳</small><br><span class="badge">需要补充资料</span></div>
+          <h4>Requests Awaiting Review</h4>
+          <div class="request"><strong>New Patient · Pain Assessment</strong><small>Preferred: Thursday Afternoon · Dr. Ling</small><br><span class="badge">Review Needed</span></div>
+          <div class="request"><strong>Returning Patient · Special Time Request</strong><small>Weekdays after 6:00 PM</small><br><span class="badge">Suggest a Time</span></div>
+          <div class="request"><strong>New Patient · Service Not Selected</strong><small>Main Concern: Sleep and Fatigue</small><br><span class="badge">More Information Needed</span></div>
         </div>
         <div class="queue">
-          <h4>审核动作</h4>
-          <div class="field"><label>选择处理方式</label><select><option>建议新时间</option><option>要求补充信息</option><option>接受患者首选时间</option><option>转交其他医生</option><option>不接受申请</option></select></div>
-          <div class="field" style="margin-top:12px"><label>诊所备注</label><textarea placeholder="填写建议时间或说明"></textarea></div>
-          <button class="btn primary" style="margin-top:12px;width:100%" onclick="alert('审核结果已保存，并准备通知患者。')">保存并通知患者</button>
+          <h4>Review Action</h4>
+          <div class="field"><label>Choose an Action</label><select><option>Suggest a New Time</option><option>Request More Information</option><option>Accept Preferred Time</option><option>Assign Another Practitioner</option><option>Decline Request</option></select></div>
+          <div class="field" style="margin-top:12px"><label>Clinic Note</label><textarea placeholder="Add a suggested time or explanation."></textarea></div>
+          <button class="btn primary" style="margin-top:12px;width:100%" onclick="alert('Review saved. The patient notification is ready to send.')">Save and Notify Patient</button>
         </div>
       </div>
     </section>
   </main>
 
-  <footer>LINGGUANG Prototype V1 · 智能预约 + 申请预约双模式</footer>
+  <footer>LINGGUANG Smart Booking V2 · Canada Edition</footer>
 </div>
 
 <script>
@@ -225,7 +225,7 @@ function selectMode(m){
  mode=m;
  document.getElementById('smartMode').classList.toggle('selected',m==='smart');
  document.getElementById('requestMode').classList.toggle('selected',m==='request');
- document.getElementById('formTitle').textContent=m==='smart'?'智能预约':'申请预约';
+ document.getElementById('formTitle').textContent=m==='smart'?'Smart Booking':'Appointment Request';
  document.querySelectorAll('.request-only').forEach(x=>x.classList.toggle('hidden',m!=='request'));
  document.getElementById('smartSlots').classList.toggle('hidden',m==='request');
 }
@@ -233,9 +233,9 @@ function nextStep(){
  const pt=document.getElementById('patientType').value;
  const svc=document.getElementById('service').value;
  const concern=document.getElementById('concern').value;
- if(mode==='smart' && (pt==='新患者'||svc.includes('不确定')||concern.includes('复杂'))){
+ if(mode==='smart' && (pt==='New Patient'||svc.includes('Not Sure')||concern.includes('Complex'))){
    selectMode('request');
-   alert('根据您选择的信息，本次更适合先提交预约申请，由诊所协助安排。');
+   alert('Based on your selections, an Appointment Request is the better option so the clinic can review your needs first.');
  }
  showStep(2);
 }
@@ -246,16 +246,16 @@ function pickSlot(el){
  el.classList.add('selected'); selectedSlot=el.textContent;
 }
 function review(){
- if(mode==='smart' && !selectedSlot){alert('请选择一个可用时间。');return}
- const date=document.getElementById('date').value || '未选择';
+ if(mode==='smart' && !selectedSlot){alert('Please select an available time.');return}
+ const date=document.getElementById('date').value || 'Not Selected';
  const rows=[
-  ['预约方式',mode==='smart'?'智能预约':'申请预约'],
-  ['患者类型',document.getElementById('patientType').value],
-  ['服务项目',document.getElementById('service').value],
-  ['医生',document.getElementById('doctor').value],
-  ['日期',date],
-  ['时间',mode==='smart'?selectedSlot:document.getElementById('range').value],
-  ['主要关注',document.getElementById('concern').value]
+  ['Booking Option',mode==='smart'?'Smart Booking':'Appointment Request'],
+  ['Patient Type',document.getElementById('patientType').value],
+  ['Service',document.getElementById('service').value],
+  ['Practitioner',document.getElementById('doctor').value],
+  ['Date',date],
+  ['Time',mode==='smart'?selectedSlot:document.getElementById('range').value],
+  ['Main Concern',document.getElementById('concern').value]
  ];
  document.getElementById('reviewBox').innerHTML=rows.map(r=>`<div><span>${r[0]}</span><strong>${r[1]}</strong></div>`).join('');
  document.getElementById('requestNotice').classList.toggle('hidden',mode!=='request');
@@ -263,13 +263,13 @@ function review(){
 }
 function submitBooking(){
  const code=(mode==='smart'?'LG-B':'LG-R')+Math.floor(100000+Math.random()*899999);
- document.getElementById('resultTitle').textContent=mode==='smart'?'预约已确认':'申请已提交';
+ document.getElementById('resultTitle').textContent=mode==='smart'?'BookingConfirmed':'Request Received';
  document.getElementById('resultText').textContent=mode==='smart'
-   ?'该时段已经为您保留。系统将发送预约提醒。'
-   :'诊所将审核您的情况和时间偏好，并向您发送确认或建议时间。';
+   ?'Your appointment time has been reserved. A reminder will be sent before your visit.'
+   :'The clinic will review your request and contact you with confirmation or a suggested time.';
  document.getElementById('resultSummary').innerHTML=
-   `<div><span>参考编号</span><strong>${code}</strong></div>
-    <div><span>当前状态</span><strong>${mode==='smart'?'Confirmed 已确认':'Under Review 审核中'}</strong></div>`;
+   `<div><span>Reference Number</span><strong>${code}</strong></div>
+    <div><span>Status</span><strong>${mode==='smart'?'Confirmed Confirmed':'Under Review Under Review'}</strong></div>`;
  document.querySelectorAll('#step1,#step2,#step3').forEach(x=>x.classList.add('hidden'));
  document.querySelector('.stepper').classList.add('hidden');
  document.getElementById('result').classList.remove('hidden');
