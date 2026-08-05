@@ -1,262 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en-CA">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#f7f4ec" />
-  <title>LINGGUANG Health OS</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123e33"><title>LINGGUANG Health OS 1.1</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar">
-      <button id="backBtn" class="icon-btn hidden" aria-label="Back">←</button>
-      <div class="brand-mini">LINGGUANG</div>
-      <div id="progressText" class="progress-text"></div>
-    </header>
+<div class="app">
+<aside>
+  <div class="brand"><div class="logo">LG</div><div><h1>LINGGUANG</h1><p>Health OS</p></div></div>
+  <nav id="mainNav">
+    <button data-page="today" class="active">🏠 Today</button>
+    <button data-page="booking">📅 Booking</button>
+    <button data-page="patients">👥 Patients</button>
+    <button data-page="clinical">🩺 Clinical</button>
+    <button data-page="ai">🤖 AI Care</button>
+    <button data-page="journey">📈 Health Journey</button>
+    <button data-page="clinic">🏥 Clinic</button>
+  </nav>
+  <div class="version">Integrated 1.1 · Local Working Edition</div>
+</aside>
+<main>
+<div class="top"><div><h2 id="pageTitle">Today</h2><p id="pageSub">Practitioner workspace</p></div><button id="homeBtn" class="avatar" title="Return to Today">DL</button></div>
 
-    <section id="screen-welcome" class="screen active">
-      <div class="hero">
-        <div class="logo-mark">光</div>
-        <p class="eyebrow">LINGGUANG</p>
-        <h1>Health OS</h1>
-        <p class="subtitle">Your health journey starts here.</p>
-        <p class="body-copy">
-          Please complete a short health assessment before your appointment.
-          It usually takes about 3–5 minutes.
-        </p>
-        <button class="primary-btn" data-next="method">Start Health Assessment</button>
-      </div>
-    </section>
+<section id="today" class="page active">
+ <div class="hero"><h3>Good evening, Dr. Ling.</h3><p>Here is what needs your attention today.</p></div>
+ <div class="grid4">
+  <button class="card stat clickable" data-page="booking"><span class="label">Today's Patients</span><b id="statPatients">0</b><div class="trend">Open booking</div></button>
+  <button class="card stat clickable" data-page="clinic"><span class="label">Pending Requests</span><b id="statRequests">0</b><div class="trend">Review requests</div></button>
+  <button class="card stat clickable" data-subpage="summary"><span class="label">AI Summaries Ready</span><b id="statSummaries">0</b><div class="trend">Ready for review</div></button>
+  <button class="card stat clickable" data-subpage="followup"><span class="label">Follow-up Tasks</span><b id="statFollowups">0</b><div class="trend">Open tasks</div></button>
+ </div>
+ <div class="layout"><div class="card"><div class="section-title"><h3>Today's Schedule</h3><button class="text-btn" data-page="booking">Add booking</button></div><div id="todaySchedule"></div></div>
+ <div class="card"><div class="section-title"><h3>Today's Priorities</h3><button class="text-btn" data-subpage="risk">Risk review</button></div><div id="todayPriorities"></div></div></div>
+</section>
 
-    <section id="screen-method" class="screen">
-      <div class="page-heading">
-        <p class="eyebrow">STEP 1</p>
-        <h2>Choose your assessment</h2>
-        <p>Select the way that feels most comfortable.</p>
-      </div>
+<section id="booking" class="page">
+ <div class="hero"><h3>Smart Booking</h3><p>Create and manage real appointments stored on this device.</p></div>
+ <div class="booking-grid"><button class="mode selected" data-booking-mode="instant"><h3>⚡ Smart Booking</h3><p class="small">Immediate confirmation.</p></button><button class="mode" data-booking-mode="request"><h3>📝 Appointment Request</h3><p class="small">Clinic review required.</p></button></div>
+ <form id="bookingForm" class="card form-card">
+  <div class="form-grid"><label>Patient name *<input name="patient" required></label><label>Patient type<select name="patientType"><option>Returning Patient</option><option>New Patient</option></select></label><label>Service<select name="service"><option>Follow-up Acupuncture</option><option>Initial Consultation</option><option>Pain Assessment</option><option>Wellness Consultation</option></select></label><label>Practitioner<select name="practitioner"><option>Dr. Ling</option><option>Dr. Chen</option><option>No Preference</option></select></label><label>Date *<input type="date" name="date" required></label><label>Time *<input type="time" name="time" required></label></div>
+  <label>Notes<textarea name="notes" rows="3"></textarea></label><div class="actions"><button class="btn primary" type="submit">Save Appointment</button><button class="btn secondary" type="button" id="clearBookings">Clear All Demo Appointments</button></div>
+ </form>
+ <div class="card list-card"><div class="section-title"><h3>Appointments</h3><span id="bookingCount" class="small"></span></div><div id="bookingList"></div></div>
+</section>
 
-      <div class="card-grid">
-        <button class="choice-card selected" data-method="form">
-          <span class="card-icon">📝</span>
-          <span class="card-title">Classic Health Form</span>
-          <span class="card-copy">Structured and complete</span>
-          <span class="badge">Recommended · 5–8 min</span>
-        </button>
+<section id="patients" class="page">
+ <div class="hero"><h3>Patient Workspace</h3><p>Search patients created by intake forms and appointments.</p></div>
+ <div class="card"><div class="search-row"><input id="patientSearch" placeholder="Search by patient name"><button class="btn primary" data-subpage="intake">New Patient Intake</button></div><div id="patientList"></div></div>
+ <div id="patientDetail" class="card hidden-panel"></div>
+</section>
 
-        <button class="choice-card" data-method="ai">
-          <span class="card-icon">🤖</span>
-          <span class="card-title">AI Conversation</span>
-          <span class="card-copy">Answer through a guided chat</span>
-          <span class="badge">Beta · 3–5 min</span>
-        </button>
+<section id="clinical" class="page">
+ <div class="hero"><h3>Clinical Workspace</h3><p>Document visits and save notes to the selected patient.</p></div>
+ <form id="clinicalForm" class="card">
+  <label>Patient<select id="clinicalPatient" name="patient"></select></label>
+  <label>Chief Concern<textarea name="chief" rows="3"></textarea></label>
+  <label>Assessment<textarea name="assessment" rows="4"></textarea></label>
+  <label>Treatment<textarea name="treatment" rows="4"></textarea></label>
+  <label>Response & Plan<textarea name="plan" rows="4"></textarea></label>
+  <div class="actions"><button class="btn primary" type="submit">Save Clinical Note</button><button class="btn secondary" type="button" id="generateDraft">Generate Structured Draft</button></div>
+ </form>
+ <div class="card list-card"><h3>Saved Clinical Notes</h3><div id="clinicalNotes"></div></div>
+</section>
 
-        <button class="choice-card disabled" data-method="voice" disabled>
-          <span class="card-icon">🎤</span>
-          <span class="card-title">Voice Assessment</span>
-          <span class="card-copy">Speak instead of typing</span>
-          <span class="badge muted">Coming soon</span>
-        </button>
+<section id="ai" class="page">
+ <div class="hero"><h3>AI Care Centre</h3><p>Each card below opens a working module. Practitioner review remains required.</p></div>
+ <div class="ai-grid">
+  <button class="card ai-card" data-subpage="intake"><div class="icon">💬</div><h3>AI Intake</h3><p class="small">Classic form and guided intake.</p></button>
+  <button class="card ai-card" data-subpage="summary"><div class="icon">🧠</div><h3>Clinical Summary</h3><p class="small">Structured summaries from submitted intake records.</p></button>
+  <button class="card ai-card" data-subpage="analysis"><div class="icon">📈</div><h3>Health Analysis</h3><p class="small">Review pain, sleep, energy and activity trends.</p></button>
+  <button class="card ai-card" data-subpage="remote"><div class="icon">🏡</div><h3>Remote Care</h3><p class="small">Collect daily check-ins and progress.</p></button>
+  <button class="card ai-card" data-subpage="followup"><div class="icon">🔄</div><h3>Follow-up</h3><p class="small">Create reminders and follow-up questions.</p></button>
+  <button class="card ai-card" data-subpage="risk"><div class="icon">⚠️</div><h3>Risk Review</h3><p class="small">Review information requiring human attention.</p></button>
+ </div><div class="notice">This offline version uses transparent rules and structured summaries. It does not call an external AI API or provide an independent diagnosis.</div>
+</section>
 
-        <button class="choice-card" data-method="upload">
-          <span class="card-icon">📄</span>
-          <span class="card-title">Upload Documents</span>
-          <span class="card-copy">Reports, prescriptions or test results</span>
-          <span class="badge">Beta</span>
-        </button>
-      </div>
+<section id="journey" class="page">
+ <div class="hero"><h3>Health Journey</h3><p>Progress based on saved remote-care check-ins.</p></div>
+ <div class="card"><label>Patient<select id="journeyPatient"></select></label><div id="journeyContent"></div></div>
+</section>
 
-      <button class="primary-btn bottom-action" data-next="profile">Continue</button>
-    </section>
+<section id="clinic" class="page">
+ <div class="hero"><h3>Clinic Intelligence</h3><p>Operational information calculated from saved local records.</p></div>
+ <div class="grid4"><div class="card stat"><span class="label">Appointments</span><b id="clinicAppointments">0</b></div><div class="card stat"><span class="label">Patients</span><b id="clinicPatients">0</b></div><div class="card stat"><span class="label">Intakes</span><b id="clinicIntakes">0</b></div><div class="card stat"><span class="label">Clinical Notes</span><b id="clinicNotesCount">0</b></div></div>
+ <div class="card list-card"><h3>Appointment Requests</h3><div id="requestList"></div></div>
+</section>
 
-    <section id="screen-profile" class="screen">
-      <div class="page-heading">
-        <p class="eyebrow">STEP 2</p>
-        <h2>About you</h2>
-        <p>Your information is saved automatically on this device.</p>
-      </div>
+<section id="module" class="page"><button class="back-link" id="moduleBack">← Back to AI Care</button><div id="moduleContent"></div></section>
+</main></div>
 
-      <form id="profileForm" class="form-stack">
-        <div class="two-col">
-          <label>First name *
-            <input name="firstName" required autocomplete="given-name" />
-          </label>
-          <label>Last name *
-            <input name="lastName" required autocomplete="family-name" />
-          </label>
-        </div>
-
-        <label>Date of birth *
-          <input type="date" name="dob" required />
-        </label>
-
-        <label>Gender *
-          <select name="gender" required>
-            <option value="">Select</option>
-            <option>Female</option>
-            <option>Male</option>
-            <option>Non-binary</option>
-            <option>Prefer not to say</option>
-          </select>
-        </label>
-
-        <label>Phone *
-          <input type="tel" name="phone" required autocomplete="tel" />
-        </label>
-
-        <label>Email
-          <input type="email" name="email" autocomplete="email" />
-        </label>
-
-        <label>Preferred language
-          <select name="language">
-            <option>English</option>
-            <option>中文</option>
-            <option>Français</option>
-            <option>Other</option>
-          </select>
-        </label>
-
-        <label>Emergency contact
-          <input name="emergencyContact" />
-        </label>
-
-        <label>Family doctor
-          <input name="familyDoctor" />
-        </label>
-
-        <button type="submit" class="primary-btn">Continue</button>
-      </form>
-    </section>
-
-    <section id="screen-concern" class="screen">
-      <div class="page-heading">
-        <p class="eyebrow">STEP 3</p>
-        <h2>What brings you here today?</h2>
-        <p>Select all that apply.</p>
-      </div>
-
-      <div id="concernGrid" class="pill-grid">
-        <button class="pill" data-value="Pain">🩹 Pain</button>
-        <button class="pill" data-value="Sleep">😴 Sleep</button>
-        <button class="pill" data-value="Digestion">🍽 Digestion</button>
-        <button class="pill" data-value="Emotional Health">😊 Emotional Health</button>
-        <button class="pill" data-value="Women's Health">❤️ Women's Health</button>
-        <button class="pill" data-value="Men's Health">👨 Men's Health</button>
-        <button class="pill" data-value="Wellness">🌿 Wellness</button>
-        <button class="pill" data-value="Other">📋 Other</button>
-      </div>
-
-      <label class="block-label">Tell us more (optional)
-        <textarea id="concernNotes" rows="4" placeholder="For example: My right shoulder has hurt for two months..."></textarea>
-      </label>
-
-      <button id="concernContinue" class="primary-btn">Continue</button>
-    </section>
-
-    <section id="screen-pain" class="screen">
-      <div class="page-heading">
-        <p class="eyebrow">STEP 4</p>
-        <h2>Pain assessment</h2>
-        <p>Help us understand the pain more clearly.</p>
-      </div>
-
-      <form id="painForm" class="form-stack">
-        <label>Where is the pain?
-          <select name="location">
-            <option value="">Select</option>
-            <option>Head</option>
-            <option>Neck</option>
-            <option>Shoulder</option>
-            <option>Upper back</option>
-            <option>Lower back</option>
-            <option>Hip</option>
-            <option>Knee</option>
-            <option>Foot / ankle</option>
-            <option>Other</option>
-          </select>
-        </label>
-
-        <fieldset>
-          <legend>Which side?</legend>
-          <div class="segmented">
-            <label><input type="radio" name="side" value="Left" /> Left</label>
-            <label><input type="radio" name="side" value="Right" /> Right</label>
-            <label><input type="radio" name="side" value="Both" /> Both</label>
-          </div>
-        </fieldset>
-
-        <label>Pain score: <strong id="painValue">5</strong>/10
-          <input id="painRange" type="range" name="painScore" min="0" max="10" value="5" />
-        </label>
-
-        <label>How long has it been present?
-          <select name="duration">
-            <option>Today</option>
-            <option>Less than 1 week</option>
-            <option>1–4 weeks</option>
-            <option>1–3 months</option>
-            <option>More than 3 months</option>
-          </select>
-        </label>
-
-        <fieldset>
-          <legend>Does it affect your sleep?</legend>
-          <div class="segmented">
-            <label><input type="radio" name="sleepImpact" value="Yes" /> Yes</label>
-            <label><input type="radio" name="sleepImpact" value="No" /> No</label>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Does it affect daily activities?</legend>
-          <div class="segmented">
-            <label><input type="radio" name="activityImpact" value="Yes" /> Yes</label>
-            <label><input type="radio" name="activityImpact" value="No" /> No</label>
-          </div>
-        </fieldset>
-
-        <label>What makes it worse?
-          <textarea name="worse" rows="3"></textarea>
-        </label>
-
-        <label>What makes it better?
-          <textarea name="better" rows="3"></textarea>
-        </label>
-
-        <button type="submit" class="primary-btn">Review Assessment</button>
-      </form>
-    </section>
-
-    <section id="screen-review" class="screen">
-      <div class="page-heading">
-        <p class="eyebrow">REVIEW</p>
-        <h2>Your health overview</h2>
-        <p>Please review the information before submitting.</p>
-      </div>
-
-      <div id="reviewCard" class="summary-card"></div>
-
-      <div class="notice">
-        This assessment supports clinical preparation and does not provide a medical diagnosis.
-      </div>
-
-      <button id="submitAssessment" class="primary-btn">Submit Assessment</button>
-    </section>
-
-    <section id="screen-complete" class="screen">
-      <div class="hero">
-        <div class="complete-icon">✓</div>
-        <p class="eyebrow">ASSESSMENT RECEIVED</p>
-        <h2>Thank you</h2>
-        <p class="body-copy">
-          Your information is ready for the clinic to review before your appointment.
-        </p>
-        <button id="restartBtn" class="secondary-btn">Start New Demo</button>
-      </div>
-    </section>
-  </main>
-
-  <script src="app.js"></script>
-</body>
-</html>
+<template id="intakeTemplate">
+<div class="hero"><h3>LINGGUANG Intake Centre</h3><p>Complete a structured patient assessment. It saves automatically on this device.</p></div>
+<div id="intakeWizard" class="card">
+ <div class="wizard-progress"><span id="wizardStepText">Step 1 of 5</span><div class="bar"><div id="wizardFill" class="fill"></div></div></div>
+ <form id="intakeForm">
+  <div class="wizard-step" data-step="1"><h3>About You</h3><div class="form-grid"><label>First name *<input name="firstName" required></label><label>Last name *<input name="lastName" required></label><label>Date of birth *<input type="date" name="dob" required></label><label>Gender<select name="gender"><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select></label><label>Phone *<input type="tel" name="phone" required></label><label>Email<input type="email" name="email"></label><label>Preferred language<select name="language"><option>English</option><option>中文</option><option>Français</option><option>Other</option></select></label><label>Emergency contact<input name="emergency"></label></div></div>
+  <div class="wizard-step" data-step="2"><h3>Main Concern</h3><p class="small">Select all that apply.</p><div class="pill-grid"><label><input type="checkbox" name="concerns" value="Pain">🩹 Pain</label><label><input type="checkbox" name="concerns" value="Sleep">😴 Sleep</label><label><input type="checkbox" name="concerns" value="Digestion">🍽 Digestion</label><label><input type="checkbox" name="concerns" value="Emotional Health">😊 Emotional Health</label><label><input type="checkbox" name="concerns" value="Women's Health">❤️ Women's Health</label><label><input type="checkbox" name="concerns" value="Men's Health">👨 Men's Health</label><label><input type="checkbox" name="concerns" value="Wellness">🌿 Wellness</label><label><input type="checkbox" name="concerns" value="Other">📋 Other</label></div><label>Tell us more<textarea name="concernNotes" rows="4"></textarea></label></div>
+  <div class="wizard-step" data-step="3"><h3>Pain & Function</h3><div class="form-grid"><label>Pain location<select name="painLocation"><option value="">Not applicable</option><option>Head</option><option>Neck</option><option>Shoulder</option><option>Upper back</option><option>Lower back</option><option>Hip</option><option>Knee</option><option>Foot / ankle</option><option>Other</option></select></label><label>Pain score (0–10)<input type="number" min="0" max="10" name="painScore"></label><label>Duration<select name="painDuration"><option value="">Not applicable</option><option>Today</option><option>Less than 1 week</option><option>1–4 weeks</option><option>1–3 months</option><option>More than 3 months</option></select></label><label>Side<select name="painSide"><option value="">Not applicable</option><option>Left</option><option>Right</option><option>Both</option></select></label></div><label>What makes it worse?<textarea name="painWorse"></textarea></label><label>What makes it better?<textarea name="painBetter"></textarea></label><div class="form-grid"><label>Sleep impact<select name="sleepImpact"><option>No</option><option>Yes</option></select></label><label>Daily activity impact<select name="activityImpact"><option>No</option><option>Yes</option></select></label></div></div>
+  <div class="wizard-step" data-step="4"><h3>TCM Health Assessment</h3><div class="form-grid"><label>Cold / heat tendency<select name="coldHeat"><option>Neutral</option><option>Often cold</option><option>Cold hands or feet</option><option>Often hot</option><option>Alternating cold and heat</option></select></label><label>Sleep quality<select name="sleepQuality"><option>Excellent</option><option>Good</option><option>Fair</option><option>Poor</option><option>Very poor</option></select></label><label>Energy (0–10)<input type="number" min="0" max="10" name="energy"></label><label>Stress (0–10)<input type="number" min="0" max="10" name="stress"></label><label>Appetite<select name="appetite"><option>Normal</option><option>Low</option><option>High</option><option>Variable</option></select></label><label>Digestion<select name="digestion"><option>Comfortable</option><option>Bloating</option><option>Reflux</option><option>Nausea</option><option>Pain</option></select></label><label>Bowel<select name="bowel"><option>Regular</option><option>Constipation</option><option>Loose</option><option>Variable</option></select></label><label>Urination<select name="urination"><option>Normal</option><option>Frequent</option><option>Night urination</option><option>Urgency</option><option>Difficult</option></select></label></div><label>Current medications / allergies<textarea name="medications"></textarea></label></div>
+  <div class="wizard-step" data-step="5"><h3>Review & Consent</h3><div id="intakeReview" class="summary-box"></div><label class="check-line"><input type="checkbox" name="consent" required> I confirm that the information is accurate and consent to clinic review.</label><label>Electronic signature *<input name="signature" required placeholder="Type full name"></label></div>
+  <div class="wizard-actions"><button type="button" class="btn secondary" id="wizardPrev">Back</button><button type="button" class="btn primary" id="wizardNext">Continue</button><button type="submit" class="btn primary" id="wizardSubmit">Submit Intake</button></div>
+ </form>
+</div>
+</template>
+<script src="app.js"></script>
+</body></html>

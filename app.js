@@ -1,187 +1,51 @@
-const state = {
-  screen: "welcome",
-  method: "form",
-  profile: {},
-  concerns: [],
-  concernNotes: "",
-  pain: {}
-};
+const DBKEY='lingguangIntegrated11';
+const defaultDB={appointments:[],intakes:[],clinicalNotes:[],checkins:[],followups:[],risks:[]};
+let db=loadDB(),bookingMode='instant',moduleReturn='ai';
+const titles={today:['Today','Practitioner workspace'],booking:['Booking','Smart booking and appointment requests'],patients:['Patients','Patient workspace and health snapshot'],clinical:['Clinical','Visit documentation and treatment planning'],ai:['AI Care','Intake, analysis, summaries, and remote care'],journey:['Health Journey','Long-term health and recovery progress'],clinic:['Clinic','Clinic operations and request review'],module:['AI Care Module','Working clinical support tool']};
+function loadDB(){try{return {...defaultDB,...JSON.parse(localStorage.getItem(DBKEY)||'{}')}}catch{return structuredClone(defaultDB)}}
+function saveDB(){localStorage.setItem(DBKEY,JSON.stringify(db));refreshAll()}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.append(t);setTimeout(()=>t.remove(),2200)}
+function patientNames(){return [...new Set([...db.intakes.map(x=>x.name),...db.appointments.map(x=>x.patient)].filter(Boolean))].sort()}
+function showPage(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(page).classList.add('active');document.querySelectorAll('#mainNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));pageTitle.textContent=titles[page][0];pageSub.textContent=titles[page][1];window.scrollTo({top:0,behavior:'smooth'});refreshAll()}
+document.addEventListener('click',e=>{const p=e.target.closest('[data-page]');if(p)showPage(p.dataset.page);const s=e.target.closest('[data-subpage]');if(s)openModule(s.dataset.subpage)});
+document.querySelectorAll('#mainNav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));homeBtn.onclick=()=>showPage('today');
 
-const order = ["welcome", "method", "profile", "concern", "pain", "review", "complete"];
-const screenEls = Object.fromEntries(order.map(id => [id, document.getElementById(`screen-${id}`)]));
-const backBtn = document.getElementById("backBtn");
-const progressText = document.getElementById("progressText");
+document.querySelectorAll('[data-booking-mode]').forEach(m=>m.onclick=()=>{document.querySelectorAll('[data-booking-mode]').forEach(x=>x.classList.remove('selected'));m.classList.add('selected');bookingMode=m.dataset.bookingMode});
+bookingForm.onsubmit=e=>{e.preventDefault();const x=Object.fromEntries(new FormData(bookingForm).entries());db.appointments.push({id:id(),...x,mode:bookingMode,status:bookingMode==='request'?'Pending':'Confirmed',createdAt:new Date().toISOString()});bookingForm.reset();saveDB();toast('Appointment saved')};
+clearBookings.onclick=()=>{if(confirm('Clear all appointments saved in this local version?')){db.appointments=[];saveDB()}};
+function deleteAppointment(i){db.appointments=db.appointments.filter(x=>x.id!==i);saveDB();toast('Appointment removed')}
+function confirmAppointment(i){const a=db.appointments.find(x=>x.id===i);if(a)a.status='Confirmed';saveDB();toast('Request confirmed')}
+window.deleteAppointment=deleteAppointment;window.confirmAppointment=confirmAppointment;
 
-function saveState() {
-  localStorage.setItem("lingguangDemoState", JSON.stringify(state));
-}
+clinicalForm.onsubmit=e=>{e.preventDefault();const x=Object.fromEntries(new FormData(clinicalForm).entries());if(!x.patient)return toast('Create or select a patient first');db.clinicalNotes.unshift({id:id(),...x,createdAt:new Date().toISOString()});clinicalForm.reset();saveDB();toast('Clinical note saved')};
+generateDraft.onclick=()=>{const p=clinicalPatient.value;const intake=db.intakes.find(x=>x.name===p);if(!p)return toast('Select a patient');clinicalForm.elements.chief.value=intake?.concerns?.join(', ')||'Follow-up visit';clinicalForm.elements.assessment.value=intake?`Reported concerns: ${intake.concerns.join(', ')}. Pain: ${intake.painScore||'not recorded'}/10. Sleep: ${intake.sleepQuality||'not recorded'}. Energy: ${intake.energy||'not recorded'}/10. Stress: ${intake.stress||'not recorded'}/10.`:'Review current symptoms and change since previous visit.';clinicalForm.elements.treatment.value='Document acupuncture points, modalities, duration, and patient tolerance.';clinicalForm.elements.plan.value='Review response, home-care advice, and follow-up timing.';toast('Structured draft generated for practitioner review')};
 
-function loadState() {
-  const saved = localStorage.getItem("lingguangDemoState");
-  if (!saved) return;
-  try {
-    const parsed = JSON.parse(saved);
-    Object.assign(state, parsed);
-  } catch {}
-}
+patientSearch.oninput=renderPatients;journeyPatient.onchange=renderJourney;
+function refreshAll(){renderToday();renderBookings();renderPatients();renderClinical();renderClinic();populatePatientSelects();renderJourney()}
+function renderToday(){const today=new Date().toISOString().slice(0,10);const appts=db.appointments.filter(a=>a.date===today).sort((a,b)=>a.time.localeCompare(b.time));statPatients.textContent=appts.length;statRequests.textContent=db.appointments.filter(a=>a.status==='Pending').length;statSummaries.textContent=db.intakes.length;statFollowups.textContent=db.followups.filter(f=>!f.done).length;todaySchedule.innerHTML=appts.length?appts.map(a=>`<div class="schedule-item"><div class="time">${esc(a.time)}</div><div><div class="name">${esc(a.patient)}</div><div class="sub">${esc(a.service)} · ${esc(a.practitioner)}</div></div><span class="badge ${a.status==='Pending'?'warn':''}">${esc(a.status)}</span></div>`).join(''):'<div class="empty">No appointments saved for today.</div>';const openRisks=db.risks.filter(r=>!r.resolved);todayPriorities.innerHTML=[...openRisks.slice(0,2).map(r=>`<div class="request-row"><div>⚠️</div><div><div class="name">${esc(r.patient)}</div><div class="sub">${esc(r.reason)}</div></div><span class="badge danger">Review</span></div>`),...db.followups.filter(f=>!f.done).slice(0,2).map(f=>`<div class="request-row"><div>FU</div><div><div class="name">${esc(f.patient)}</div><div class="sub">${esc(f.question)}</div></div><span class="badge">Due</span></div>`)].join('')||'<div class="empty">No urgent priorities.</div>'}
+function renderBookings(){bookingCount.textContent=`${db.appointments.length} saved`;bookingList.innerHTML=db.appointments.length?[...db.appointments].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(a=>`<div class="list-row"><div><b>${esc(a.date)}</b><div class="sub">${esc(a.time)}</div></div><div><div class="name">${esc(a.patient)}</div><div class="sub">${esc(a.service)} · ${esc(a.practitioner)}</div></div><div class="actions"><span class="badge ${a.status==='Pending'?'warn':''}">${esc(a.status)}</span>${a.status==='Pending'?`<button class="btn secondary" onclick="confirmAppointment('${a.id}')">Confirm</button>`:''}<button class="btn danger-btn" onclick="deleteAppointment('${a.id}')">Delete</button></div></div>`).join(''):'<div class="empty">No appointments yet.</div>'}
+function renderPatients(){const q=(patientSearch.value||'').toLowerCase();const names=patientNames().filter(n=>n.toLowerCase().includes(q));patientList.innerHTML=names.length?names.map(n=>{const i=db.intakes.find(x=>x.name===n);return `<button class="list-row clickable" style="width:100%;background:none;border:0" onclick="openPatient('${encodeURIComponent(n)}')"><div class="patient-photo">${esc(n.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</div><div><div class="name">${esc(n)}</div><div class="sub">${i?'Intake submitted':'Appointment record'}</div></div><span class="badge">Open</span></button>`}).join(''):'<div class="empty">No patients found. Submit an intake or create an appointment.</div>'}
+function openPatient(enc){const n=decodeURIComponent(enc),i=db.intakes.find(x=>x.name===n),notes=db.clinicalNotes.filter(x=>x.patient===n);patientDetail.classList.add('show');patientDetail.innerHTML=`<div class="section-title"><h3>${esc(n)}</h3><button class="text-btn" onclick="patientDetail.classList.remove('show')">Close</button></div><div class="metrics"><div class="metric"><span>Pain</span><b>${esc(i?.painScore||'—')}${i?.painScore?'/10':''}</b></div><div class="metric"><span>Sleep</span><b>${esc(i?.sleepQuality||'—')}</b></div><div class="metric"><span>Energy</span><b>${esc(i?.energy||'—')}</b></div><div class="metric"><span>Stress</span><b>${esc(i?.stress||'—')}</b></div></div><h3>Structured Intake Summary</h3><p>${i?esc(makeSummary(i)):'No intake has been submitted.'}</p><h3>Clinical Notes (${notes.length})</h3>${notes.map(x=>`<div class="summary-box"><b>${new Date(x.createdAt).toLocaleString()}</b><br>${esc(x.assessment||x.chief)}</div>`).join('')||'<div class="empty">No clinical notes.</div>'}`;patientDetail.scrollIntoView({behavior:'smooth'})}
+window.openPatient=openPatient;
+function renderClinical(){const notes=db.clinicalNotes;clinicalNotes.innerHTML=notes.length?notes.map(n=>`<div class="list-row"><div>${new Date(n.createdAt).toLocaleDateString()}</div><div><div class="name">${esc(n.patient)}</div><div class="sub">${esc(n.chief||'Clinical note')}</div></div><span class="badge">Saved</span></div>`).join(''):'<div class="empty">No clinical notes saved.</div>'}
+function renderClinic(){clinicAppointments.textContent=db.appointments.length;clinicPatients.textContent=patientNames().length;clinicIntakes.textContent=db.intakes.length;clinicNotesCount.textContent=db.clinicalNotes.length;const req=db.appointments.filter(a=>a.status==='Pending');requestList.innerHTML=req.length?req.map(a=>`<div class="request-row"><div>${esc(a.date)}</div><div><div class="name">${esc(a.patient)}</div><div class="sub">${esc(a.service)} · ${esc(a.time)}</div></div><button class="btn primary" onclick="confirmAppointment('${a.id}')">Confirm</button></div>`).join(''):'<div class="empty">No pending appointment requests.</div>'}
+function populatePatientSelects(){const names=patientNames();[clinicalPatient,journeyPatient].forEach(sel=>{const current=sel.value;sel.innerHTML='<option value="">Select patient</option>'+names.map(n=>`<option>${esc(n)}</option>`).join('');if(names.includes(current))sel.value=current})}
+function renderJourney(){const n=journeyPatient.value;if(!n){journeyContent.innerHTML='<div class="empty">Select a patient to view trends.</div>';return}const c=db.checkins.filter(x=>x.patient===n);if(!c.length){journeyContent.innerHTML='<div class="empty">No remote-care check-ins for this patient.</div>';return}const avg=k=>Math.round(c.reduce((s,x)=>s+(+x[k]||0),0)/c.length*10);journeyContent.innerHTML=[['Pain comfort',100-avg('pain')],['Sleep quality',avg('sleep')],['Energy',avg('energy')],['Care-plan completion',avg('completion')]].map(([l,v])=>`<div class="journey-row"><div class="head"><span>${l}</span><span>${v}%</span></div><div class="bar"><div class="fill" style="width:${Math.max(0,Math.min(100,v))}%"></div></div></div>`).join('')}
 
-function showScreen(id) {
-  state.screen = id;
-  Object.values(screenEls).forEach(el => el.classList.remove("active"));
-  screenEls[id].classList.add("active");
-
-  const index = order.indexOf(id);
-  backBtn.classList.toggle("hidden", index <= 0 || id === "complete");
-  progressText.textContent = (index > 0 && index < 6) ? `${index} of 5` : "";
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  saveState();
-}
-
-document.querySelectorAll("[data-next]").forEach(btn => {
-  btn.addEventListener("click", () => showScreen(btn.dataset.next));
-});
-
-backBtn.addEventListener("click", () => {
-  const index = order.indexOf(state.screen);
-  if (index > 0) showScreen(order[index - 1]);
-});
-
-document.querySelectorAll(".choice-card:not(.disabled)").forEach(card => {
-  card.addEventListener("click", () => {
-    document.querySelectorAll(".choice-card").forEach(c => c.classList.remove("selected"));
-    card.classList.add("selected");
-    state.method = card.dataset.method;
-    saveState();
-  });
-});
-
-const profileForm = document.getElementById("profileForm");
-profileForm.addEventListener("input", () => {
-  state.profile = Object.fromEntries(new FormData(profileForm).entries());
-  saveState();
-});
-profileForm.addEventListener("submit", e => {
-  e.preventDefault();
-  state.profile = Object.fromEntries(new FormData(profileForm).entries());
-  showScreen("concern");
-});
-
-document.querySelectorAll("#concernGrid .pill").forEach(pill => {
-  pill.addEventListener("click", () => {
-    const value = pill.dataset.value;
-    pill.classList.toggle("selected");
-    state.concerns = [...document.querySelectorAll("#concernGrid .pill.selected")]
-      .map(el => el.dataset.value);
-    saveState();
-  });
-});
-
-document.getElementById("concernNotes").addEventListener("input", e => {
-  state.concernNotes = e.target.value;
-  saveState();
-});
-
-document.getElementById("concernContinue").addEventListener("click", () => {
-  if (state.concerns.length === 0) {
-    alert("Please select at least one concern.");
-    return;
-  }
-  if (state.concerns.includes("Pain")) {
-    showScreen("pain");
-  } else {
-    buildReview();
-    showScreen("review");
-  }
-});
-
-const painRange = document.getElementById("painRange");
-painRange.addEventListener("input", e => {
-  document.getElementById("painValue").textContent = e.target.value;
-});
-
-const painForm = document.getElementById("painForm");
-painForm.addEventListener("input", () => {
-  state.pain = Object.fromEntries(new FormData(painForm).entries());
-  saveState();
-});
-painForm.addEventListener("submit", e => {
-  e.preventDefault();
-  state.pain = Object.fromEntries(new FormData(painForm).entries());
-  buildReview();
-  showScreen("review");
-});
-
-function safe(value, fallback = "Not provided") {
-  return value && String(value).trim() ? value : fallback;
-}
-
-function buildReview() {
-  const p = state.profile;
-  const pain = state.pain || {};
-  const hasPain = state.concerns.includes("Pain");
-
-  document.getElementById("reviewCard").innerHTML = `
-    <div class="summary-section">
-      <h3>${safe(p.firstName, "Patient")} ${safe(p.lastName, "")}</h3>
-      <p><strong>Date of birth:</strong> ${safe(p.dob)}</p>
-      <p><strong>Phone:</strong> ${safe(p.phone)}</p>
-      <p><strong>Preferred language:</strong> ${safe(p.language)}</p>
-    </div>
-    <div class="summary-section">
-      <h3>Main concerns</h3>
-      <p>${state.concerns.join(", ")}</p>
-      <p><strong>Additional notes:</strong> ${safe(state.concernNotes)}</p>
-    </div>
-    ${hasPain ? `
-    <div class="summary-section">
-      <h3>Pain details</h3>
-      <p><strong>Location:</strong> ${safe(pain.location)}</p>
-      <p><strong>Side:</strong> ${safe(pain.side)}</p>
-      <p><strong>Score:</strong> ${safe(pain.painScore, "5")}/10</p>
-      <p><strong>Duration:</strong> ${safe(pain.duration)}</p>
-      <p><strong>Sleep impact:</strong> ${safe(pain.sleepImpact)}</p>
-      <p><strong>Daily activity impact:</strong> ${safe(pain.activityImpact)}</p>
-      <p><strong>Worse with:</strong> ${safe(pain.worse)}</p>
-      <p><strong>Better with:</strong> ${safe(pain.better)}</p>
-    </div>` : ""}
-  `;
-}
-
-document.getElementById("submitAssessment").addEventListener("click", () => {
-  state.submittedAt = new Date().toISOString();
-  saveState();
-  showScreen("complete");
-});
-
-document.getElementById("restartBtn").addEventListener("click", () => {
-  localStorage.removeItem("lingguangDemoState");
-  location.reload();
-});
-
-function restoreForm(form, data) {
-  Object.entries(data || {}).forEach(([name, value]) => {
-    const fields = form.elements[name];
-    if (!fields) return;
-    if (fields instanceof RadioNodeList) {
-      [...fields].forEach(field => field.checked = field.value === value);
-    } else {
-      fields.value = value;
-    }
-  });
-}
-
-loadState();
-restoreForm(profileForm, state.profile);
-restoreForm(painForm, state.pain);
-document.getElementById("concernNotes").value = state.concernNotes || "";
-document.getElementById("painValue").textContent = state.pain?.painScore || "5";
-
-document.querySelectorAll("#concernGrid .pill").forEach(pill => {
-  pill.classList.toggle("selected", state.concerns.includes(pill.dataset.value));
-});
-document.querySelectorAll(".choice-card").forEach(card => {
-  card.classList.toggle("selected", card.dataset.method === state.method);
-});
-
-if (state.screen === "review") buildReview();
-showScreen(state.screen || "welcome");
+moduleBack.onclick=()=>showPage(moduleReturn);function openModule(type){moduleReturn='ai';showPage('module');const names=patientNames();if(type==='intake')return mountIntake();if(type==='summary')return renderSummaryModule();if(type==='analysis')return renderAnalysisModule();if(type==='remote')return renderRemoteModule();if(type==='followup')return renderFollowupModule();if(type==='risk')return renderRiskModule()}
+function mountIntake(){moduleContent.innerHTML='';moduleContent.append(document.getElementById('intakeTemplate').content.cloneNode(true));let step=1;const form=document.getElementById('intakeForm'),draft=JSON.parse(localStorage.getItem('lingguangIntakeDraft')||'{}');Object.entries(draft).forEach(([k,v])=>{const f=form.elements[k];if(!f)return;if(k==='concerns'&&Array.isArray(v))[...f].forEach(x=>x.checked=v.includes(x.value));else f.value=v});form.oninput=()=>{const fd=new FormData(form),o=Object.fromEntries(fd.entries());o.concerns=fd.getAll('concerns');localStorage.setItem('lingguangIntakeDraft',JSON.stringify(o))};function draw(){document.querySelectorAll('.wizard-step').forEach(x=>x.classList.toggle('active',+x.dataset.step===step));wizardStepText.textContent=`Step ${step} of 5`;wizardFill.style.width=`${step*20}%`;wizardPrev.style.visibility=step===1?'hidden':'visible';wizardNext.style.display=step===5?'none':'inline-block';wizardSubmit.style.display=step===5?'inline-block':'none';if(step===5){const fd=new FormData(form),o=Object.fromEntries(fd.entries());o.concerns=fd.getAll('concerns');intakeReview.innerHTML=`<b>${esc(o.firstName)} ${esc(o.lastName)}</b><br>Concerns: ${esc(o.concerns.join(', ')||'None selected')}<br>Pain: ${esc(o.painScore||'not recorded')}/10<br>Sleep: ${esc(o.sleepQuality)}<br>Energy: ${esc(o.energy||'not recorded')}/10<br>Stress: ${esc(o.stress||'not recorded')}/10`}}wizardPrev.onclick=()=>{step=Math.max(1,step-1);draw()};wizardNext.onclick=()=>{const current=document.querySelector(`.wizard-step[data-step="${step}"]`);const req=[...current.querySelectorAll('[required]')];if(req.some(x=>!x.value)){req.find(x=>!x.value).reportValidity();return}step=Math.min(5,step+1);draw()};form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),o=Object.fromEntries(fd.entries());o.concerns=fd.getAll('concerns');o.id=id();o.name=`${o.firstName} ${o.lastName}`.trim();o.createdAt=new Date().toISOString();db.intakes.unshift(o);const riskReasons=[];if(+o.painScore>=8)riskReasons.push('High pain score');if(o.activityImpact==='Yes'&&+o.painScore>=7)riskReasons.push('Severe pain affecting daily activity');if((o.medications||'').toLowerCase().includes('blood thinner')||(o.medications||'').toLowerCase().includes('warfarin'))riskReasons.push('Possible anticoagulant medication');riskReasons.forEach(reason=>db.risks.push({id:id(),patient:o.name,reason,resolved:false,createdAt:new Date().toISOString()}));localStorage.removeItem('lingguangIntakeDraft');saveDB();moduleContent.innerHTML=`<div class="hero"><h3>Assessment received</h3><p>${esc(o.name)} has been added to the patient workspace.</p></div><div class="card"><h3>Structured Summary</h3><p>${esc(makeSummary(o))}</p><div class="actions"><button class="btn primary" data-subpage="summary">Open Clinical Summary</button><button class="btn secondary" data-page="patients">Open Patient Workspace</button></div></div>`};draw()}
+function makeSummary(o){return `${o.name} reports ${o.concerns?.join(', ')||'general wellness concerns'}. ${o.concernNotes||''} Pain is ${o.painScore||'not recorded'}/10${o.painLocation?` at the ${o.painLocation}`:''}. Sleep is ${o.sleepQuality||'not recorded'}, energy ${o.energy||'not recorded'}/10, and stress ${o.stress||'not recorded'}/10. Cold/heat tendency: ${o.coldHeat||'not recorded'}. Digestion: ${o.digestion||'not recorded'}. This summary requires practitioner verification.`}
+function renderSummaryModule(){moduleContent.innerHTML=`<div class="hero"><h3>Clinical Summary</h3><p>Structured intake summaries ready for practitioner review.</p></div><div class="card">${db.intakes.length?db.intakes.map(i=>`<div class="summary-box"><div class="section-title"><b>${esc(i.name)}</b><span class="badge">${new Date(i.createdAt).toLocaleDateString()}</span></div>${esc(makeSummary(i))}<div class="actions"><button class="btn secondary" onclick="copyText('${i.id}')">Copy Summary</button><button class="btn primary" onclick="startClinical('${encodeURIComponent(i.name)}')">Use in Clinical Note</button></div></div>`).join(''):'<div class="empty">No submitted intakes yet.</div>'}</div>`}
+function copyText(i){const x=db.intakes.find(y=>y.id===i);navigator.clipboard?.writeText(makeSummary(x));toast('Summary copied')}
+function startClinical(enc){showPage('clinical');clinicalPatient.value=decodeURIComponent(enc);generateDraft.click()}
+window.copyText=copyText;window.startClinical=startClinical;
+function renderAnalysisModule(){const names=patientNames();moduleContent.innerHTML=`<div class="hero"><h3>Health Analysis</h3><p>Transparent trend analysis from saved check-ins.</p></div><div class="card"><label>Patient<select id="analysisPatient"><option value="">Select patient</option>${names.map(n=>`<option>${esc(n)}</option>`).join('')}</select></label><div id="analysisOutput" class="empty">Select a patient.</div></div>`;analysisPatient.onchange=()=>{const c=db.checkins.filter(x=>x.patient===analysisPatient.value);analysisOutput.innerHTML=c.length?`<div class="metrics"><div class="metric"><span>Check-ins</span><b>${c.length}</b></div><div class="metric"><span>Latest pain</span><b>${c.at(-1).pain}/10</b></div><div class="metric"><span>Latest sleep</span><b>${c.at(-1).sleep}/10</b></div><div class="metric"><span>Latest energy</span><b>${c.at(-1).energy}/10</b></div></div><p>${trendSentence(c)}</p>`:'No check-ins saved.'}}
+function trendSentence(c){if(c.length<2)return 'More check-ins are needed before a trend can be calculated.';const a=c[0],b=c.at(-1),p=(+b.pain)-(+a.pain),s=(+b.sleep)-(+a.sleep);return `Pain has ${p<0?'improved':p>0?'increased':'remained stable'} by ${Math.abs(p)} point(s). Sleep has ${s>0?'improved':s<0?'declined':'remained stable'} by ${Math.abs(s)} point(s). Practitioner interpretation is required.`}
+function renderRemoteModule(){const names=patientNames();moduleContent.innerHTML=`<div class="hero"><h3>Remote Care Check-in</h3><p>Record daily patient progress.</p></div><form id="remoteForm" class="card"><div class="form-grid"><label>Patient<select name="patient" required><option value="">Select</option>${names.map(n=>`<option>${esc(n)}</option>`).join('')}</select></label><label>Date<input type="date" name="date" required value="${new Date().toISOString().slice(0,10)}"></label><label>Pain (0–10)<input type="number" min="0" max="10" name="pain" required></label><label>Sleep (0–10)<input type="number" min="0" max="10" name="sleep" required></label><label>Energy (0–10)<input type="number" min="0" max="10" name="energy" required></label><label>Care plan completion (0–10)<input type="number" min="0" max="10" name="completion" required></label></div><label>Notes<textarea name="notes"></textarea></label><button class="btn primary" type="submit">Save Check-in</button></form>`;remoteForm.onsubmit=e=>{e.preventDefault();db.checkins.push({id:id(),...Object.fromEntries(new FormData(remoteForm).entries()),createdAt:new Date().toISOString()});saveDB();toast('Remote check-in saved');renderRemoteModule()}}
+function renderFollowupModule(){const names=patientNames();moduleContent.innerHTML=`<div class="hero"><h3>Follow-up</h3><p>Create and complete real follow-up tasks.</p></div><form id="followupForm" class="card"><div class="form-grid"><label>Patient<select name="patient" required><option value="">Select</option>${names.map(n=>`<option>${esc(n)}</option>`).join('')}</select></label><label>Due date<input type="date" name="due" required></label></div><label>Question or reminder<textarea name="question" required></textarea></label><button class="btn primary">Add Follow-up</button></form><div class="card list-card">${db.followups.length?db.followups.map(f=>`<div class="list-row"><div>${esc(f.due)}</div><div><div class="name">${esc(f.patient)}</div><div class="sub">${esc(f.question)}</div></div><button class="btn ${f.done?'secondary':'primary'}" onclick="toggleFollowup('${f.id}')">${f.done?'Reopen':'Complete'}</button></div>`).join(''):'<div class="empty">No follow-up tasks.</div>'}</div>`;followupForm.onsubmit=e=>{e.preventDefault();db.followups.push({id:id(),...Object.fromEntries(new FormData(followupForm).entries()),done:false});saveDB();renderFollowupModule();toast('Follow-up added')}}
+function toggleFollowup(i){const f=db.followups.find(x=>x.id===i);f.done=!f.done;saveDB();renderFollowupModule()}window.toggleFollowup=toggleFollowup;
+function renderRiskModule(){moduleContent.innerHTML=`<div class="hero"><h3>Risk Review</h3><p>Rule-based flags requiring prompt human review.</p></div><div class="card">${db.risks.length?db.risks.map(r=>`<div class="request-row"><div>⚠️</div><div><div class="name">${esc(r.patient)}</div><div class="sub">${esc(r.reason)} · ${new Date(r.createdAt).toLocaleDateString()}</div></div><button class="btn ${r.resolved?'secondary':'primary'}" onclick="toggleRisk('${r.id}')">${r.resolved?'Reopen':'Mark reviewed'}</button></div>`).join(''):'<div class="empty">No risk flags generated.</div>'}</div><div class="notice">Flags are not diagnoses. A qualified practitioner must assess clinical urgency and appropriate action.</div>`}
+function toggleRisk(i){const r=db.risks.find(x=>x.id===i);r.resolved=!r.resolved;saveDB();renderRiskModule()}window.toggleRisk=toggleRisk;
+refreshAll();

@@ -1,18 +1,22 @@
-# LINGGUANG Health OS V0.0.1
+# LINGGUANG Health OS Integrated 1.1
 
-This is the first runnable patient-intake prototype.
+This package merges Preview 1.0 with Patient Intake V0.0.1.
 
-## Included
-- Welcome screen
-- Four intake entry cards
-- Patient information form
-- Main concern selection
-- Dynamic pain assessment
-- Review and submit page
-- Automatic local saving in the browser
-- Mobile-friendly responsive design
+## Working functions
+- All main navigation buttons
+- Booking creation, confirmation and deletion
+- Patient intake wizard with auto-save
+- Patient list and patient details
+- Structured clinical summaries
+- Clinical-note generation and saving
+- Remote-care daily check-ins
+- Health trend analysis
+- Follow-up task creation/completion
+- Rule-based risk flags and review
+- Health Journey and Clinic dashboards
+- Browser localStorage persistence
 
-## Open
-Double-click `index.html` in the folder.
+## Important limitation
+This is a fully interactive offline/local web application, not yet a cloud production system. Data is stored only in the browser on the current device. External GPT/API, authentication, encrypted cloud database, SMS/email and multi-device syncing are not connected in this release.
 
-For iPhone testing, upload the folder to any static web host or open it through a local web server.
+Open `index.html` to run.
