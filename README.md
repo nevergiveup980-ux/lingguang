@@ -1,7 +1,9 @@
-# LINGGUANG Smart Booking V2 — Canada Edition
+# LINGGUANG Health OS — Preview 1.0
 
-Open `index.html` in a browser, or upload it to the root of your GitHub repository.
+Interactive English-language front-end prototype for the Canadian market.
 
-Features: Smart Booking, Appointment Request, automatic routing, confirmation status, clinic review desk, and responsive mobile layout.
+Included modules: Today, Booking, Patients, Clinical, AI Care, Health Journey, and Clinic Intelligence.
 
-This is a front-end prototype and does not yet connect to a live database or send email/SMS.
+Open `index.html` in a browser or upload it to the root of a GitHub Pages repository.
+
+This is a front-end prototype only. It has no real database, authentication, messaging, billing, or medical AI connection.
