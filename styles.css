@@ -25,3 +25,71 @@
   .workspace-header{align-items:flex-start}
   .global-back-button{width:44px;height:44px;flex-basis:44px}
 }
+
+
+/* Brand Edition Build 001.2 */
+.brand-button{
+  width:100%;
+  border:0;
+  color:#fff;
+  background:transparent;
+  padding:0;
+  text-align:left;
+  cursor:pointer;
+}
+.brand-button:hover{opacity:.95}
+.brand-logo-image{
+  width:52px;
+  height:52px;
+  border-radius:16px;
+  object-fit:cover;
+  display:block;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+.brand-button span{display:block}
+.brand strong{font-size:16px;letter-spacing:.035em}
+.brand small{font-size:12px}
+.brand-splash{
+  position:fixed;
+  inset:0;
+  z-index:999;
+  display:grid;
+  place-items:center;
+  background:#f7f6ef;
+  opacity:0;
+  transition:opacity .35s ease;
+}
+.brand-splash.show{opacity:1}
+.brand-splash.hide{opacity:0;pointer-events:none}
+.brand-splash-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  color:#123e33;
+}
+.brand-splash-card img{
+  width:132px;
+  height:132px;
+  border-radius:34px;
+  object-fit:cover;
+  box-shadow:0 24px 60px rgba(18,62,51,.22);
+  margin-bottom:22px;
+}
+.brand-splash-card strong{
+  font-size:28px;
+  letter-spacing:.15em;
+}
+.brand-splash-card span{
+  margin-top:8px;
+  font-size:19px;
+  color:#3d695c;
+}
+.brand-splash-card small{
+  margin-top:16px;
+  color:#9b7a2d;
+  letter-spacing:.08em;
+}
+@media(max-width:900px){
+  .brand-logo-image{width:50px;height:50px}
+}

@@ -464,7 +464,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Navigation Edition Build 001.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Brand Edition Build 001.2 · Insight, Balance, Health.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -474,10 +474,10 @@ function createAppShell() {
   return `
     <div class="app-shell">
       <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-logo">LG</div>
-          <div><strong>LINGGUANG</strong><small>Health OS</small></div>
-        </div>
+        <button type="button" class="brand brand-button" data-route="settings-about" aria-label="About LINGGUANG Health OS">
+          <img class="brand-logo-image" src="lingguang-logo.png?v=1.4.2-brand" alt="LINGGUANG logo">
+          <span><strong>LINGGUANG</strong><small>Health OS</small></span>
+        </button>
         <nav class="main-nav" aria-label="Main navigation">
           <button data-route="today">🏠 Today</button>
           <button data-route="booking">📅 Booking</button>
@@ -488,7 +488,7 @@ function createAppShell() {
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Navigation Build 001</div>
+        <div class="build-label">Brand Build 001.2</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -503,6 +503,14 @@ function createAppShell() {
     </div>
     <div class="toast" id="toast"></div>
     <div class="modal" id="modal" aria-hidden="true"><div class="modal-card" id="modal-card"></div></div>
+    <div class="brand-splash" id="brand-splash" aria-hidden="true">
+      <div class="brand-splash-card">
+        <img src="lingguang-logo.png?v=1.4.2-brand" alt="">
+        <strong>LINGGUANG</strong>
+        <span>Health OS</span>
+        <small>Insight · Balance · Health</small>
+      </div>
+    </div>
   `;
 }
 
@@ -653,4 +661,14 @@ const router={
 /* ===== src/main.js ===== */
 seedIfEmpty();
 document.querySelector('#app').innerHTML = createAppShell();
+const splash=document.querySelector('#brand-splash');
+if(splash){
+  const seen=sessionStorage.getItem('lingguangBrandSplashSeen');
+  if(seen){splash.remove();}
+  else{
+    sessionStorage.setItem('lingguangBrandSplashSeen','1');
+    requestAnimationFrame(()=>splash.classList.add('show'));
+    setTimeout(()=>{splash.classList.add('hide');setTimeout(()=>splash.remove(),450)},1100);
+  }
+}
 router.start();
