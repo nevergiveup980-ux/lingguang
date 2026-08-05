@@ -1,27 +1,262 @@
 <!DOCTYPE html>
-<html lang="en-CA">
+<html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LINGGUANG Health OS — Preview 1.0</title>
-<style>
-:root{--bg:#f4f7f6;--panel:#fff;--text:#17352d;--muted:#73827c;--green:#167b61;--green2:#4cad89;--line:#e1e9e5;--soft:#eaf5f0;--warn:#fff5dc;--shadow:0 16px 40px rgba(24,67,55,.09)}*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}aside{background:#123e33;color:white;padding:24px 18px;position:sticky;top:0;height:100vh}.brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}.logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#38a47e,#8bd0b5);display:grid;place-items:center;font-weight:900}.brand h1{font-size:16px;margin:0}.brand p{font-size:11px;opacity:.7;margin:4px 0 0}nav button{width:100%;border:0;background:transparent;color:#dcebe5;padding:12px 13px;border-radius:13px;text-align:left;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:6px}nav button.active,nav button:hover{background:rgba(255,255,255,.13);color:#fff}.version{position:absolute;bottom:22px;left:18px;right:18px;font-size:11px;opacity:.65}main{padding:26px;max-width:1450px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.top h2{margin:0;font-size:30px}.top p{margin:6px 0 0;color:var(--muted)}.avatar{width:44px;height:44px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:900;color:var(--green)}.page{display:none}.page.active{display:block}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:20px}.stat .label{font-size:13px;color:var(--muted);font-weight:700}.stat b{font-size:31px;display:block;margin-top:8px}.trend{font-size:12px;color:var(--green);margin-top:7px}.layout{display:grid;grid-template-columns:1.35fr .85fr;gap:16px;margin-top:16px}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.section-title h3{margin:0}.small{font-size:12px;color:var(--muted)}.schedule-item,.request-row{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}.schedule-item:last-child,.request-row:last-child{border-bottom:0}.time{font-weight:900}.name{font-weight:800}.sub{font-size:12px;color:var(--muted);margin-top:4px}.badge{font-size:11px;border-radius:999px;padding:6px 9px;background:var(--soft);color:var(--green);font-weight:900}.badge.warn{background:var(--warn);color:#8b6400}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:13px;padding:11px 14px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(145deg,var(--green),var(--green2));color:white}.secondary{background:#edf2f0;color:#42584f}.hero{background:linear-gradient(145deg,#e7f6ef,#f7fbf9);border:1px solid #d5eae0;border-radius:24px;padding:24px;margin-bottom:16px}.hero h3{font-size:24px;margin:0 0 7px}.hero p{color:var(--muted);margin:0}.patient-head{display:flex;justify-content:space-between;gap:16px;align-items:center}.patient-meta{display:flex;align-items:center;gap:14px}.patient-photo{width:64px;height:64px;border-radius:20px;background:var(--soft);display:grid;place-items:center;font-size:22px;font-weight:900}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}.metric{background:#fafcfb;border:1px solid var(--line);border-radius:16px;padding:15px}.metric span{display:block;color:var(--muted);font-size:12px}.metric b{font-size:22px;margin-top:6px;display:block}.ai-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.ai-card{cursor:pointer;transition:.2s}.ai-card:hover{transform:translateY(-2px);border-color:#9dcfbd}.icon{font-size:25px}.journey-row{margin:17px 0}.journey-row .head{display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-bottom:7px}.bar{height:10px;background:#e9efec;border-radius:99px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--green),#72c6a6);border-radius:99px}.booking-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mode{border:1px solid var(--line);border-radius:18px;padding:18px;cursor:pointer}.mode.selected{border:2px solid var(--green);background:var(--soft)}input,select,textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:#fbfdfc;font-size:14px;margin-top:6px}.field{margin-bottom:14px}.field label{font-size:12px;color:#52645c;font-weight:800}.notice{padding:13px;border-radius:14px;background:var(--warn);color:#765800;font-size:12px;line-height:1.5}@media(max-width:900px){.app{grid-template-columns:1fr}aside{height:auto;position:relative;padding:12px}.brand{margin-bottom:10px}nav{display:flex;overflow:auto;gap:5px}nav button{min-width:max-content;width:auto;margin:0}.version{display:none}main{padding:14px}.grid4,.metrics,.ai-grid,.booking-grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}}@media(max-width:560px){.grid4,.metrics,.ai-grid,.booking-grid{grid-template-columns:1fr}.top h2{font-size:24px}.schedule-item,.request-row{grid-template-columns:64px 1fr}.schedule-item>:last-child,.request-row>:last-child{grid-column:2}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f4ec" />
+  <title>LINGGUANG Health OS</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="app">
-<aside><div class="brand"><div class="logo">LG</div><div><h1>LINGGUANG</h1><p>Health OS</p></div></div><nav>
-<button class="active" onclick="showPage('today',this)">🏠 Today</button><button onclick="showPage('booking',this)">📅 Booking</button><button onclick="showPage('patients',this)">👥 Patients</button><button onclick="showPage('clinical',this)">🩺 Clinical</button><button onclick="showPage('ai',this)">🤖 AI Care</button><button onclick="showPage('journey',this)">📈 Health Journey</button><button onclick="showPage('clinic',this)">🏥 Clinic</button>
-</nav><div class="version">Preview 1.0 · Canada Edition</div></aside>
-<main><div class="top"><div><h2 id="pageTitle">Today</h2><p id="pageSub">Practitioner workspace</p></div><div class="avatar">DL</div></div>
-<section id="today" class="page active"><div class="hero"><h3>Good evening, Dr. Ling.</h3><p>Here is what needs your attention today.</p></div><div class="grid4"><div class="card stat"><span class="label">Today's Patients</span><b>8</b><div class="trend">2 initial visits</div></div><div class="card stat"><span class="label">Pending Requests</span><b>3</b><div class="trend">1 awaiting reply</div></div><div class="card stat"><span class="label">AI Summaries Ready</span><b>6</b><div class="trend">Ready for review</div></div><div class="card stat"><span class="label">Follow-up Tasks</span><b>4</b><div class="trend">2 due today</div></div></div><div class="layout"><div class="card"><div class="section-title"><h3>Today's Schedule</h3><span class="small">8 appointments</span></div><div class="schedule-item"><div class="time">9:00</div><div><div class="name">John Smith</div><div class="sub">Follow-up acupuncture · 45 min</div></div><span class="badge">Checked in</span></div><div class="schedule-item"><div class="time">10:30</div><div><div class="name">Emily Johnson</div><div class="sub">Initial consultation · 75 min</div></div><span class="badge warn">Intake pending</span></div><div class="schedule-item"><div class="time">1:00</div><div><div class="name">Michael Chen</div><div class="sub">Pain assessment · 60 min</div></div><span class="badge">Confirmed</span></div></div><div class="card"><div class="section-title"><h3>Today's Priorities</h3><span class="small">4 tasks</span></div><div class="request-row"><div>AI</div><div><div class="name">Review Emily's intake</div><div class="sub">Summary prepared by AI Care</div></div><span class="badge warn">High</span></div><div class="request-row"><div>FU</div><div><div class="name">Follow up with John</div><div class="sub">Pain trend plateaued this week</div></div><span class="badge">Today</span></div></div></div></section>
-<section id="booking" class="page"><div class="hero"><h3>Smart Booking</h3><p>Instant booking for routine visits. Request review for new or special cases.</p></div><div class="booking-grid"><div class="mode selected" onclick="selectMode(this)"><h3>⚡ Smart Booking</h3><p class="small">Immediate confirmation from available appointment times.</p></div><div class="mode" onclick="selectMode(this)"><h3>📝 Appointment Request</h3><p class="small">Clinic review for new patients or flexible scheduling.</p></div></div><div class="card" style="margin-top:16px"><div class="field"><label>Patient Type</label><select><option>Returning Patient</option><option>New Patient</option></select></div><div class="field"><label>Service</label><select><option>Follow-up Acupuncture</option><option>Initial Consultation</option><option>Pain Assessment</option><option>Wellness Consultation</option></select></div><div class="field"><label>Practitioner</label><select><option>No Preference</option><option>Dr. Ling</option><option>Dr. Chen</option></select></div><div class="actions"><button class="btn primary" onclick="alert('Booking flow continues to date and time selection.')">Continue</button><button class="btn secondary">View Calendar</button></div></div></section>
-<section id="patients" class="page"><div class="hero patient-head"><div class="patient-meta"><div class="patient-photo">JS</div><div><h3>John Smith</h3><p>Returning patient · Active care plan</p></div></div><span class="badge">Stable</span></div><div class="metrics"><div class="metric"><span>Pain</span><b>3/10</b></div><div class="metric"><span>Sleep</span><b>Good</b></div><div class="metric"><span>Energy</span><b>Moderate</b></div><div class="metric"><span>Recovery</span><b>78%</b></div></div><div class="layout"><div class="card"><div class="section-title"><h3>AI Summary</h3><span class="badge">Ready</span></div><p>Pain has improved over the last 30 days. Sleep remains stable. The patient completed 82% of assigned stretching activities.</p><div class="actions"><button class="btn primary">Open Full Summary</button><button class="btn secondary">Clinical Notes</button></div></div><div class="card"><h3>Next Appointment</h3><p><b>August 18 · 10:30 AM</b></p><p class="small">Follow-up acupuncture · Dr. Ling</p></div></div></section>
-<section id="clinical" class="page"><div class="hero"><h3>Clinical Workspace</h3><p>Document the visit, review AI summaries, and update the care plan.</p></div><div class="card"><div class="field"><label>Chief Concern</label><textarea>Neck and shoulder discomfort, improved since last visit.</textarea></div><div class="field"><label>Assessment</label><textarea></textarea></div><div class="field"><label>Treatment</label><textarea></textarea></div><div class="field"><label>Response & Plan</label><textarea></textarea></div><div class="actions"><button class="btn primary">Save Clinical Note</button><button class="btn secondary" onclick="alert('AI-generated draft prepared for practitioner review.')">Generate AI Draft</button></div></div></section>
-<section id="ai" class="page"><div class="hero"><h3>AI Care Centre</h3><p>AI supports intake, summaries, follow-up, and remote care. Practitioner review remains required.</p></div><div class="ai-grid"><div class="card ai-card"><div class="icon">💬</div><h3>AI Intake</h3><p class="small">Guided pre-visit questions and structured summary.</p></div><div class="card ai-card"><div class="icon">🧠</div><h3>Clinical Summary</h3><p class="small">Condense patient history and recent changes.</p></div><div class="card ai-card"><div class="icon">📈</div><h3>Health Analysis</h3><p class="small">Review trends across pain, sleep, energy, and activity.</p></div><div class="card ai-card"><div class="icon">🏡</div><h3>Remote Care</h3><p class="small">Collect daily check-ins and care-plan progress.</p></div><div class="card ai-card"><div class="icon">🔄</div><h3>Follow-up</h3><p class="small">Prepare reminders and follow-up questions.</p></div><div class="card ai-card"><div class="icon">⚠️</div><h3>Risk Review</h3><p class="small">Flag information that may need prompt human review.</p></div></div><div class="notice" style="margin-top:16px">AI Care does not provide an independent medical diagnosis. Clinical decisions remain with qualified healthcare professionals.</div></section>
-<section id="journey" class="page"><div class="hero"><h3>Health Journey</h3><p>Long-term change, presented clearly for the patient and practitioner.</p></div><div class="card"><div class="journey-row"><div class="head"><span>Pain Improvement</span><span>72%</span></div><div class="bar"><div class="fill" style="width:72%"></div></div></div><div class="journey-row"><div class="head"><span>Sleep Quality</span><span>81%</span></div><div class="bar"><div class="fill" style="width:81%"></div></div></div><div class="journey-row"><div class="head"><span>Energy</span><span>64%</span></div><div class="bar"><div class="fill" style="width:64%"></div></div></div><div class="journey-row"><div class="head"><span>Care Plan Completion</span><span>82%</span></div><div class="bar"><div class="fill" style="width:82%"></div></div></div><div class="journey-row"><div class="head"><span>Overall Recovery Direction</span><span>Improving ↗</span></div><div class="bar"><div class="fill" style="width:78%"></div></div></div></div></section>
-<section id="clinic" class="page"><div class="hero"><h3>Clinic Intelligence</h3><p>Operational information that needs attention today.</p></div><div class="grid4"><div class="card stat"><span class="label">Patients Today</span><b>24</b></div><div class="card stat"><span class="label">Average Wait</span><b>16m</b></div><div class="card stat"><span class="label">Capacity</span><b>82%</b></div><div class="card stat"><span class="label">New Patients</span><b>3</b></div></div></section>
-</main></div>
-<script>
-const titles={today:['Today','Practitioner workspace'],booking:['Booking','Smart booking and appointment requests'],patients:['Patients','Patient workspace and health snapshot'],clinical:['Clinical','Visit documentation and treatment planning'],ai:['AI Care','Intake, analysis, summaries, and remote care'],journey:['Health Journey','Long-term health and recovery progress'],clinic:['Clinic','Clinic operations and request review']};function showPage(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');pageTitle.textContent=titles[id][0];pageSub.textContent=titles[id][1];window.scrollTo({top:0,behavior:'smooth'})}function selectMode(el){document.querySelectorAll('.mode').forEach(m=>m.classList.remove('selected'));el.classList.add('selected')}
-</script>
-</body></html>
+  <main class="app-shell">
+    <header class="topbar">
+      <button id="backBtn" class="icon-btn hidden" aria-label="Back">←</button>
+      <div class="brand-mini">LINGGUANG</div>
+      <div id="progressText" class="progress-text"></div>
+    </header>
+
+    <section id="screen-welcome" class="screen active">
+      <div class="hero">
+        <div class="logo-mark">光</div>
+        <p class="eyebrow">LINGGUANG</p>
+        <h1>Health OS</h1>
+        <p class="subtitle">Your health journey starts here.</p>
+        <p class="body-copy">
+          Please complete a short health assessment before your appointment.
+          It usually takes about 3–5 minutes.
+        </p>
+        <button class="primary-btn" data-next="method">Start Health Assessment</button>
+      </div>
+    </section>
+
+    <section id="screen-method" class="screen">
+      <div class="page-heading">
+        <p class="eyebrow">STEP 1</p>
+        <h2>Choose your assessment</h2>
+        <p>Select the way that feels most comfortable.</p>
+      </div>
+
+      <div class="card-grid">
+        <button class="choice-card selected" data-method="form">
+          <span class="card-icon">📝</span>
+          <span class="card-title">Classic Health Form</span>
+          <span class="card-copy">Structured and complete</span>
+          <span class="badge">Recommended · 5–8 min</span>
+        </button>
+
+        <button class="choice-card" data-method="ai">
+          <span class="card-icon">🤖</span>
+          <span class="card-title">AI Conversation</span>
+          <span class="card-copy">Answer through a guided chat</span>
+          <span class="badge">Beta · 3–5 min</span>
+        </button>
+
+        <button class="choice-card disabled" data-method="voice" disabled>
+          <span class="card-icon">🎤</span>
+          <span class="card-title">Voice Assessment</span>
+          <span class="card-copy">Speak instead of typing</span>
+          <span class="badge muted">Coming soon</span>
+        </button>
+
+        <button class="choice-card" data-method="upload">
+          <span class="card-icon">📄</span>
+          <span class="card-title">Upload Documents</span>
+          <span class="card-copy">Reports, prescriptions or test results</span>
+          <span class="badge">Beta</span>
+        </button>
+      </div>
+
+      <button class="primary-btn bottom-action" data-next="profile">Continue</button>
+    </section>
+
+    <section id="screen-profile" class="screen">
+      <div class="page-heading">
+        <p class="eyebrow">STEP 2</p>
+        <h2>About you</h2>
+        <p>Your information is saved automatically on this device.</p>
+      </div>
+
+      <form id="profileForm" class="form-stack">
+        <div class="two-col">
+          <label>First name *
+            <input name="firstName" required autocomplete="given-name" />
+          </label>
+          <label>Last name *
+            <input name="lastName" required autocomplete="family-name" />
+          </label>
+        </div>
+
+        <label>Date of birth *
+          <input type="date" name="dob" required />
+        </label>
+
+        <label>Gender *
+          <select name="gender" required>
+            <option value="">Select</option>
+            <option>Female</option>
+            <option>Male</option>
+            <option>Non-binary</option>
+            <option>Prefer not to say</option>
+          </select>
+        </label>
+
+        <label>Phone *
+          <input type="tel" name="phone" required autocomplete="tel" />
+        </label>
+
+        <label>Email
+          <input type="email" name="email" autocomplete="email" />
+        </label>
+
+        <label>Preferred language
+          <select name="language">
+            <option>English</option>
+            <option>中文</option>
+            <option>Français</option>
+            <option>Other</option>
+          </select>
+        </label>
+
+        <label>Emergency contact
+          <input name="emergencyContact" />
+        </label>
+
+        <label>Family doctor
+          <input name="familyDoctor" />
+        </label>
+
+        <button type="submit" class="primary-btn">Continue</button>
+      </form>
+    </section>
+
+    <section id="screen-concern" class="screen">
+      <div class="page-heading">
+        <p class="eyebrow">STEP 3</p>
+        <h2>What brings you here today?</h2>
+        <p>Select all that apply.</p>
+      </div>
+
+      <div id="concernGrid" class="pill-grid">
+        <button class="pill" data-value="Pain">🩹 Pain</button>
+        <button class="pill" data-value="Sleep">😴 Sleep</button>
+        <button class="pill" data-value="Digestion">🍽 Digestion</button>
+        <button class="pill" data-value="Emotional Health">😊 Emotional Health</button>
+        <button class="pill" data-value="Women's Health">❤️ Women's Health</button>
+        <button class="pill" data-value="Men's Health">👨 Men's Health</button>
+        <button class="pill" data-value="Wellness">🌿 Wellness</button>
+        <button class="pill" data-value="Other">📋 Other</button>
+      </div>
+
+      <label class="block-label">Tell us more (optional)
+        <textarea id="concernNotes" rows="4" placeholder="For example: My right shoulder has hurt for two months..."></textarea>
+      </label>
+
+      <button id="concernContinue" class="primary-btn">Continue</button>
+    </section>
+
+    <section id="screen-pain" class="screen">
+      <div class="page-heading">
+        <p class="eyebrow">STEP 4</p>
+        <h2>Pain assessment</h2>
+        <p>Help us understand the pain more clearly.</p>
+      </div>
+
+      <form id="painForm" class="form-stack">
+        <label>Where is the pain?
+          <select name="location">
+            <option value="">Select</option>
+            <option>Head</option>
+            <option>Neck</option>
+            <option>Shoulder</option>
+            <option>Upper back</option>
+            <option>Lower back</option>
+            <option>Hip</option>
+            <option>Knee</option>
+            <option>Foot / ankle</option>
+            <option>Other</option>
+          </select>
+        </label>
+
+        <fieldset>
+          <legend>Which side?</legend>
+          <div class="segmented">
+            <label><input type="radio" name="side" value="Left" /> Left</label>
+            <label><input type="radio" name="side" value="Right" /> Right</label>
+            <label><input type="radio" name="side" value="Both" /> Both</label>
+          </div>
+        </fieldset>
+
+        <label>Pain score: <strong id="painValue">5</strong>/10
+          <input id="painRange" type="range" name="painScore" min="0" max="10" value="5" />
+        </label>
+
+        <label>How long has it been present?
+          <select name="duration">
+            <option>Today</option>
+            <option>Less than 1 week</option>
+            <option>1–4 weeks</option>
+            <option>1–3 months</option>
+            <option>More than 3 months</option>
+          </select>
+        </label>
+
+        <fieldset>
+          <legend>Does it affect your sleep?</legend>
+          <div class="segmented">
+            <label><input type="radio" name="sleepImpact" value="Yes" /> Yes</label>
+            <label><input type="radio" name="sleepImpact" value="No" /> No</label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Does it affect daily activities?</legend>
+          <div class="segmented">
+            <label><input type="radio" name="activityImpact" value="Yes" /> Yes</label>
+            <label><input type="radio" name="activityImpact" value="No" /> No</label>
+          </div>
+        </fieldset>
+
+        <label>What makes it worse?
+          <textarea name="worse" rows="3"></textarea>
+        </label>
+
+        <label>What makes it better?
+          <textarea name="better" rows="3"></textarea>
+        </label>
+
+        <button type="submit" class="primary-btn">Review Assessment</button>
+      </form>
+    </section>
+
+    <section id="screen-review" class="screen">
+      <div class="page-heading">
+        <p class="eyebrow">REVIEW</p>
+        <h2>Your health overview</h2>
+        <p>Please review the information before submitting.</p>
+      </div>
+
+      <div id="reviewCard" class="summary-card"></div>
+
+      <div class="notice">
+        This assessment supports clinical preparation and does not provide a medical diagnosis.
+      </div>
+
+      <button id="submitAssessment" class="primary-btn">Submit Assessment</button>
+    </section>
+
+    <section id="screen-complete" class="screen">
+      <div class="hero">
+        <div class="complete-icon">✓</div>
+        <p class="eyebrow">ASSESSMENT RECEIVED</p>
+        <h2>Thank you</h2>
+        <p class="body-copy">
+          Your information is ready for the clinic to review before your appointment.
+        </p>
+        <button id="restartBtn" class="secondary-btn">Start New Demo</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
