@@ -106,7 +106,7 @@ async function todayPage() {
 
 
 /* ===== src/pages/booking.js ===== */
-async function bookingPage() {
+async function bookingFormPage() {
   const d = readStore();
   return { title:'Booking', subtitle:'Smart booking and appointment requests', html:`
     ${hero('Smart Booking','Create, confirm, and manage appointment requests.')}
@@ -131,11 +131,11 @@ async function patientsPage(){const d=readStore();return{title:'Patients',subtit
 
 
 /* ===== src/pages/clinical.js ===== */
-async function clinicalPage(){const d=readStore();const opts=d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');return{title:'Clinical',subtitle:'Visit documentation and treatment planning',html:`${hero('Clinical Workspace','Review intake summaries and save practitioner-approved notes.')}<div class="panel"><form id="clinical-form"><label>Patient<select name="patientId">${opts||'<option value="">No patients yet</option>'}</select></label><label>Chief Concern<textarea name="chiefConcern"></textarea></label><label>Assessment<textarea name="assessment"></textarea></label><label>Treatment<textarea name="treatment"></textarea></label><label>Response & Plan<textarea name="plan"></textarea></label><div class="button-row"><button type="button" class="button secondary" id="draft-note">Generate Draft from Intake</button><button class="button primary">Save Clinical Note</button></div></form></div>`,mount(){const form=document.querySelector('#clinical-form');document.querySelector('#draft-note').onclick=()=>{const pid=form.patientId.value;const i=d.intakes.slice().reverse().find(x=>x.patientId===pid);if(!i)return toast('No intake found for this patient');form.chiefConcern.value=i.concerns.join(', ');form.assessment.value=i.summary;form.plan.value='Review response, update care plan, and arrange follow-up as clinically appropriate.';toast('Draft prepared for practitioner review');};form.onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(form));if(!v.patientId)return toast('Select a patient');updateStore(d=>d.clinicalNotes.push({id:crypto.randomUUID(),createdAt:new Date().toISOString(),...v}));toast('Clinical note saved');};}}}
+async function clinicalNewNotePage(){const d=readStore();const opts=d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');return{title:'Clinical',subtitle:'Visit documentation and treatment planning',html:`${hero('Clinical Workspace','Review intake summaries and save practitioner-approved notes.')}<div class="panel"><form id="clinical-form"><label>Patient<select name="patientId">${opts||'<option value="">No patients yet</option>'}</select></label><label>Chief Concern<textarea name="chiefConcern"></textarea></label><label>Assessment<textarea name="assessment"></textarea></label><label>Treatment<textarea name="treatment"></textarea></label><label>Response & Plan<textarea name="plan"></textarea></label><div class="button-row"><button type="button" class="button secondary" id="draft-note">Generate Draft from Intake</button><button class="button primary">Save Clinical Note</button></div></form></div>`,mount(){const form=document.querySelector('#clinical-form');document.querySelector('#draft-note').onclick=()=>{const pid=form.patientId.value;const i=d.intakes.slice().reverse().find(x=>x.patientId===pid);if(!i)return toast('No intake found for this patient');form.chiefConcern.value=i.concerns.join(', ');form.assessment.value=i.summary;form.plan.value='Review response, update care plan, and arrange follow-up as clinically appropriate.';toast('Draft prepared for practitioner review');};form.onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(form));if(!v.patientId)return toast('Select a patient');updateStore(d=>d.clinicalNotes.push({id:crypto.randomUUID(),createdAt:new Date().toISOString(),...v}));toast('Clinical note saved');};}}}
 
 
 /* ===== src/pages/aiCare.js ===== */
-async function aiCarePage(){const cards=[['💬','AI Intake','Guided pre-visit questions and structured summary.','intake'],['🧠','Clinical Summary','Condense patient history and recent changes.','clinical-summary'],['📈','Health Analysis','Review trends across pain, sleep, energy, and activity.','health-analysis'],['🏡','Remote Care','Collect daily check-ins and care-plan progress.','remote-care'],['🔄','Follow-up','Prepare reminders and follow-up questions.','follow-up'],['⚠️','Risk Review','Flag information that may need prompt human review.','risk-review']];return{title:'AI Care',subtitle:'Intake, analysis, summaries, and remote care',html:`${hero('AI Care Centre','AI supports intake, summaries, follow-up, and remote care. Practitioner review remains required.')}<div class="module-grid">${cards.map(c=>`<button class="module-card" data-route="${c[3]}"><span>${c[0]}</span><h3>${c[1]}</h3><p>${c[2]}</p></button>`).join('')}</div><div class="notice">AI Care does not provide an independent medical diagnosis. Clinical decisions remain with qualified healthcare professionals.</div>`}};
+async function aiCarePage(){const cards=[['💬','AI Intake','Guided pre-visit questions and structured summary.','ai-intake'],['🧠','Clinical Summary','Condense patient history and recent changes.','clinical-summary'],['📈','Health Analysis','Review trends across pain, sleep, energy, and activity.','health-analysis'],['🏡','Remote Care','Collect daily check-ins and care-plan progress.','remote-care'],['🔄','Follow-up','Prepare reminders and follow-up questions.','follow-up'],['⚠️','Risk Review','Flag information that may need prompt human review.','risk-review']];return{title:'AI Care',subtitle:'Intake, analysis, summaries, and remote care',html:`${hero('AI Care Centre','AI supports intake, summaries, follow-up, and remote care. Practitioner review remains required.')}<div class="module-grid">${cards.map(c=>`<button class="module-card" data-route="${c[3]}"><span>${c[0]}</span><h3>${c[1]}</h3><p>${c[2]}</p></button>`).join('')}</div><div class="notice">AI Care does not provide an independent medical diagnosis. Clinical decisions remain with qualified healthcare professionals.</div>`}};
 
 
 /* ===== src/pages/intake.js ===== */
@@ -143,7 +143,7 @@ function capture(){const value=id=>document.querySelector(`#${id}`)?.value;const
 function rerender(){document.querySelector('#intake-content').innerHTML=intakeView();mountControls();}
 function mountControls(){document.querySelectorAll('[data-concern]').forEach(b=>b.onclick=()=>{toggleConcern(b.dataset.concern);rerender();});document.querySelector('[data-intake-back]')?.addEventListener('click',()=>{capture();setStep(step-1);rerender();});document.querySelector('[data-intake-next]')?.addEventListener('click',()=>{capture();if(step===0&&(!draft.firstName||!draft.lastName||!draft.phone))return toast('First name, last name and phone are required');if(step===1&&!(draft.concerns||[]).length)return toast('Select at least one concern');if(step<4){setStep(step+1);rerender();return;}submit();});}
 function submit(){const d={...draft};const name=`${d.firstName} ${d.lastName}`.trim();updateStore(store=>{let patient=store.patients.find(p=>p.name.toLowerCase()===name.toLowerCase());if(!patient){patient={id:crypto.randomUUID(),name,phone:d.phone,email:d.email,primaryConcern:(d.concerns||[]).join(', ')};store.patients.push(patient);}store.intakes.push({id:crypto.randomUUID(),patientId:patient.id,patientName:name,concerns:d.concerns||[],summary:makeSummary(d),tcmSummary:makeTcmSummary(d),risks:detectRisks(d),raw:d,createdAt:new Date().toISOString()});});resetIntake();toast('Assessment submitted');router.go('clinical-summary');}
-async function intakePage(){return{title:'AI Intake',subtitle:'Patient health assessment',html:`${hero('Patient Health Assessment','Classic structured intake inside the main LINGGUANG system.')}<div id="intake-content">${intakeView()}</div>`,mount:mountControls};}
+async function classicIntakePage(){return{title:'AI Intake',subtitle:'Patient health assessment',html:`${hero('Patient Health Assessment','Classic structured intake inside the main LINGGUANG system.')}<div id="intake-content">${intakeView()}</div>`,mount:mountControls};}
 
 
 /* ===== src/pages/clinicalSummary.js ===== */
@@ -181,6 +181,294 @@ async function healthJourneyPage(){const d=readStore(),last=d.checkins.at(-1);re
 async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'Clinic operations and local data',html:`${hero('Clinic Intelligence','Operational information based on locally stored records.')}<div class="stats-grid"><div class="stat-card"><span>Patients</span><strong>${d.patients.length}</strong></div><div class="stat-card"><span>Appointments</span><strong>${d.appointments.length}</strong></div><div class="stat-card"><span>Clinical Notes</span><strong>${d.clinicalNotes.length}</strong></div><div class="stat-card"><span>Check-ins</span><strong>${d.checkins.length}</strong></div></div><div class="panel"><h3>Local Data Controls</h3><p>This development build stores data in the current browser.</p><button class="button danger" id="reset-data">Reset All Local Data</button></div>`,mount(){document.querySelector('#reset-data').onclick=()=>{if(confirm('Reset all local LINGGUANG data?')){resetStore();toast('Local data reset');location.reload();}};}}}
 
 
+
+/* ===== Navigation Edition Build 001 ===== */
+let routeParams = new URLSearchParams();
+
+function menuCard(icon,title,text,route,extra=''){
+  return `<button class="menu-entry" data-route="${route}" ${extra}>
+    <span class="menu-icon">${icon}</span>
+    <span class="menu-copy"><strong>${title}</strong><small>${text}</small></span>
+    <span class="menu-arrow">›</span>
+  </button>`;
+}
+function backBar(parent,label='Back'){
+  return `<div class="back-bar"><button class="button secondary" data-route="${parent}">← ${label}</button></div>`;
+}
+function selectedPatient(){
+  const id=routeParams.get('patient');
+  return readStore().patients.find(p=>p.id===id);
+}
+function patientRoute(route,id){
+  return `${route}?patient=${encodeURIComponent(id)}`;
+}
+
+async function todayPage(){
+  const d=readStore();
+  const open=d.followups.filter(x=>!x.done).length;
+  return {title:'Dashboard',subtitle:'Choose a work area',html:`
+    ${hero('Good day, Dr. Ling.','Select a button to enter the next level. Numbers below are information only.')}
+    <div class="stats-grid">
+      <div class="stat-card"><span>Patients</span><strong>${d.patients.length}</strong><small>Active local records</small></div>
+      <div class="stat-card"><span>Pending Requests</span><strong>${d.appointments.filter(x=>x.status==='Pending').length}</strong><small>Awaiting review</small></div>
+      <div class="stat-card"><span>AI Summaries</span><strong>${d.intakes.length}</strong><small>Available for review</small></div>
+      <div class="stat-card"><span>Follow-up Tasks</span><strong>${open}</strong><small>Open tasks</small></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Main Menu</h3><span>Choose one</span></div>
+      <div class="menu-list">
+        ${menuCard('👥','Patients','Patient list, profiles, records and documents','patients')}
+        ${menuCard('📅','Booking','New bookings, pending requests and appointment history','booking')}
+        ${menuCard('🩺','Clinical','Today’s visits, notes and treatment records','clinical')}
+        ${menuCard('🤖','AI Care','Intake, summaries, analysis and follow-up','ai-care')}
+        ${menuCard('📈','Health Journey','Recovery timeline and long-term trends','health-journey')}
+        ${menuCard('🏥','Clinic','Clinic activity and local data controls','clinic')}
+        ${menuCard('⚙️','Settings','Preferences and system information','settings')}
+      </div>
+    </div>`};
+}
+
+async function patientsPage(){
+  const d=readStore();
+  return {title:'Patients',subtitle:'Patient hub',html:`
+    ${backBar('today','Dashboard')}
+    ${hero('Patients','Choose the next patient action.')}
+    <div class="panel"><div class="menu-list">
+      ${menuCard('➕','New Patient','Create a basic patient profile','patient-new')}
+      ${menuCard('💬','New Health Assessment','Start an intake and create/update a patient','ai-intake')}
+      ${menuCard('👥','Patient List',`${d.patients.length} patient record(s)`,'patient-list')}
+      ${menuCard('🗄️','Archived Patients','View archived patient records','patient-archived')}
+    </div></div>`};
+}
+
+async function patientNewPage(){
+  return {title:'New Patient',subtitle:'Create a basic profile',html:`
+    ${backBar('patients','Patients')}
+    ${hero('New Patient','Create the profile first. Clinical and AI records can be added afterward.')}
+    <div class="panel"><form id="new-patient-form" class="form-grid">
+      <label>First Name *<input name="firstName" required></label>
+      <label>Last Name *<input name="lastName" required></label>
+      <label>Phone *<input name="phone" required></label>
+      <label>Email<input name="email" type="email"></label>
+      <label>Date of Birth<input name="dob" type="date"></label>
+      <label>Preferred Language<select name="language"><option>English</option><option>中文</option><option>Français</option><option>Other</option></select></label>
+      <div class="form-action"><button class="button primary">Save Patient</button></div>
+    </form></div>`,mount(){
+      document.querySelector('#new-patient-form').onsubmit=e=>{
+        e.preventDefault(); const v=Object.fromEntries(new FormData(e.currentTarget));
+        const id=crypto.randomUUID();
+        updateStore(d=>d.patients.push({id,name:`${v.firstName} ${v.lastName}`.trim(),phone:v.phone,email:v.email,dob:v.dob,language:v.language,primaryConcern:'Not recorded',archived:false}));
+        toast('Patient saved'); router.go(patientRoute('patient-detail',id));
+      };
+    }};
+}
+
+async function patientListPage(){
+  const d=readStore(); const active=d.patients.filter(p=>!p.archived);
+  return {title:'Patient List',subtitle:'Select a patient',html:`
+    ${backBar('patients','Patients')}
+    ${hero('Patient List','Tap the Open button to enter the patient profile.')}
+    <div class="panel">${active.length?`<div class="patient-grid">${active.map(p=>`
+      <article class="patient-card">
+        <div class="patient-avatar">${escapeHtml(p.name.split(' ').map(x=>x[0]).join('').slice(0,2))}</div>
+        <div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.phone||'No phone')}</p><small>${escapeHtml(p.primaryConcern||'No concern')}</small></div>
+        <button class="button primary" data-route="${patientRoute('patient-detail',p.id)}">Open ›</button>
+      </article>`).join('')}</div>`:empty('No patients yet. Create a patient or complete an intake.')}</div>`};
+}
+
+async function patientArchivedPage(){
+  const d=readStore(); const rows=d.patients.filter(p=>p.archived);
+  return {title:'Archived Patients',subtitle:'Archived patient records',html:`
+    ${backBar('patients','Patients')}
+    ${hero('Archived Patients','Archived records remain available for review.')}
+    <div class="panel">${rows.length?rows.map(p=>menuCard('👤',p.name,p.phone||'No phone',patientRoute('patient-detail',p.id))).join(''):empty('No archived patients.')}</div>`};
+}
+
+async function patientDetailPage(){
+  const p=selectedPatient(); if(!p)return {title:'Patient',subtitle:'Record not found',html:`${backBar('patient-list','Patient List')}${empty('Patient record not found.')}`};
+  return {title:p.name,subtitle:'Patient profile hub',html:`
+    ${backBar('patient-list','Patient List')}
+    <div class="hero patient-profile-hero"><div><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(p.phone||'No phone')} · ${escapeHtml(p.primaryConcern||'No main concern')}</p></div><span class="badge">${p.archived?'Archived':'Active'}</span></div>
+    <div class="panel"><div class="menu-list">
+      ${menuCard('👤','Basic Information','Contact, language and personal details',patientRoute('patient-basic',p.id))}
+      ${menuCard('📅','Booking History','Appointments connected to this patient',patientRoute('patient-bookings',p.id))}
+      ${menuCard('🩺','Clinical Records','Clinical notes and treatment history',patientRoute('patient-clinical',p.id))}
+      ${menuCard('🤖','AI Care','Intake summaries, risks and analysis',patientRoute('patient-ai',p.id))}
+      ${menuCard('📈','Health Journey','Check-ins and recovery timeline',patientRoute('patient-journey',p.id))}
+      ${menuCard('🏡','Remote Care','Daily pain, sleep and energy check-in',patientRoute('patient-remote',p.id))}
+      ${menuCard('📄','Documents','Reports, consent and referral placeholders',patientRoute('patient-documents',p.id))}
+    </div></div>
+    <button class="button ${p.archived?'secondary':'danger'}" id="archive-patient">${p.archived?'Restore Patient':'Archive Patient'}</button>`,
+    mount(){document.querySelector('#archive-patient').onclick=()=>{updateStore(d=>{const x=d.patients.find(x=>x.id===p.id);x.archived=!x.archived});toast(p.archived?'Patient restored':'Patient archived');router.go('patient-list');};}};
+}
+
+async function patientBasicPage(){
+  const p=selectedPatient(); if(!p)return patientDetailPage();
+  return {title:'Basic Information',subtitle:p.name,html:`
+    ${backBar(patientRoute('patient-detail',p.id),p.name)}
+    ${hero('Basic Information','Update the patient profile.')}
+    <div class="panel"><form id="patient-basic-form" class="form-grid">
+      <label>Name *<input name="name" required value="${escapeHtml(p.name)}"></label>
+      <label>Phone<input name="phone" value="${escapeHtml(p.phone||'')}"></label>
+      <label>Email<input name="email" type="email" value="${escapeHtml(p.email||'')}"></label>
+      <label>Date of Birth<input name="dob" type="date" value="${escapeHtml(p.dob||'')}"></label>
+      <label>Preferred Language<input name="language" value="${escapeHtml(p.language||'')}"></label>
+      <label>Primary Concern<input name="primaryConcern" value="${escapeHtml(p.primaryConcern||'')}"></label>
+      <div class="form-action"><button class="button primary">Save Changes</button></div>
+    </form></div>`,mount(){document.querySelector('#patient-basic-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));updateStore(d=>Object.assign(d.patients.find(x=>x.id===p.id),v));toast('Patient profile updated');};}};
+}
+
+async function patientBookingsPage(){
+  const p=selectedPatient(),d=readStore();if(!p)return patientDetailPage();
+  const rows=d.appointments.filter(a=>a.patientName.toLowerCase()===p.name.toLowerCase());
+  return {title:'Booking History',subtitle:p.name,html:`
+    ${backBar(patientRoute('patient-detail',p.id),p.name)}
+    ${hero('Booking History','Appointments matched to this patient name.','<button class="button primary" data-route="booking-new">New Booking</button>')}
+    <div class="panel">${rows.length?`<table><thead><tr><th>Date</th><th>Time</th><th>Service</th><th>Status</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${formatDate(x.date)}</td><td>${escapeHtml(x.time)}</td><td>${escapeHtml(x.service)}</td><td>${badge(x.status,x.status==='Pending'?'warning':'default')}</td></tr>`).join('')}</tbody></table>`:empty('No matching appointments.')}</div>`};
+}
+
+async function patientClinicalPage(){
+  const p=selectedPatient(),d=readStore();if(!p)return patientDetailPage();
+  const notes=d.clinicalNotes.filter(n=>n.patientId===p.id);
+  return {title:'Clinical Records',subtitle:p.name,html:`
+    ${backBar(patientRoute('patient-detail',p.id),p.name)}
+    ${hero('Clinical Records','Open existing records or create a new practitioner note.','<button class="button primary" data-route="clinical-new">New Note</button>')}
+    <div class="panel">${notes.length?notes.slice().reverse().map(n=>`<div class="record-row"><div><strong>${new Date(n.createdAt).toLocaleDateString()}</strong><small>${escapeHtml(n.chiefConcern||'Clinical note')}</small></div><button class="button secondary" data-note="${n.id}">View ›</button></div>`).join(''):empty('No clinical records for this patient.')}</div>`,
+    mount(){document.querySelectorAll('[data-note]').forEach(b=>b.onclick=()=>{const n=notes.find(x=>x.id===b.dataset.note);openModal(`<div class="panel-head"><h3>Clinical Note</h3><button class="button secondary" onclick="closeModal()">Close</button></div><p><b>Chief concern:</b> ${escapeHtml(n.chiefConcern||'—')}</p><p><b>Assessment:</b> ${escapeHtml(n.assessment||'—')}</p><p><b>Treatment:</b> ${escapeHtml(n.treatment||'—')}</p><p><b>Plan:</b> ${escapeHtml(n.plan||'—')}</p>`);});}};
+}
+
+async function patientAiPage(){
+  const p=selectedPatient(),d=readStore();if(!p)return patientDetailPage();
+  const count=d.intakes.filter(i=>i.patientId===p.id).length;
+  return {title:'Patient AI Care',subtitle:p.name,html:`
+    ${backBar(patientRoute('patient-detail',p.id),p.name)}
+    ${hero('AI Care','Choose an AI-assisted function for this patient.')}
+    <div class="panel"><div class="menu-list">
+      ${menuCard('💬','New AI Intake','Start a new structured assessment','ai-intake')}
+      ${menuCard('🧠','Clinical Summaries',`${count} summary record(s)`,'clinical-summary')}
+      ${menuCard('📈','Health Analysis','Review remote-care trends','health-analysis')}
+      ${menuCard('⚠️','Risk Review','Review screening flags','risk-review')}
+    </div></div>`};
+}
+
+async function patientJourneyPage(){
+  const p=selectedPatient(),d=readStore();if(!p)return patientDetailPage();
+  const rows=d.checkins.filter(c=>c.patientId===p.id);
+  return {title:'Health Journey',subtitle:p.name,html:`
+    ${backBar(patientRoute('patient-detail',p.id),p.name)}
+    ${hero('Health Journey','A timeline of assessments, care and progress.')}
+    <div class="panel">${rows.length?rows.slice().reverse().map(c=>`<div class="timeline-item"><b>${new Date(c.createdAt).toLocaleDateString()}</b><div>Pain ${c.pain}/10 · Sleep ${c.sleep}/10 · Energy ${c.energy}/10</div><small>${escapeHtml(c.note||'Daily check-in')}</small></div>`).join(''):empty('No remote-care check-ins yet.')}</div>`};
+}
+
+async function patientRemotePage(){
+  const p=selectedPatient();if(!p)return patientDetailPage();
+  return {title:'Remote Care',subtitle:p.name,html:`
+    ${backBar(patientRoute('patient-detail',p.id),p.name)}
+    ${hero('Remote Care Check-in','Record today’s pain, sleep and energy.')}
+    <div class="panel"><form id="patient-checkin" class="form-grid">
+      <label>Pain 0–10<input name="pain" type="number" min="0" max="10" value="3"></label>
+      <label>Sleep 0–10<input name="sleep" type="number" min="0" max="10" value="7"></label>
+      <label>Energy 0–10<input name="energy" type="number" min="0" max="10" value="6"></label>
+      <label class="wide">Daily Note<textarea name="note"></textarea></label>
+      <div class="form-action"><button class="button primary">Save Check-in</button></div>
+    </form></div>`,mount(){document.querySelector('#patient-checkin').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));updateStore(d=>d.checkins.push({id:crypto.randomUUID(),patientId:p.id,patientName:p.name,createdAt:new Date().toISOString(),...v}));toast('Remote-care check-in saved');router.go(patientRoute('patient-journey',p.id));};}};
+}
+
+async function patientDocumentsPage(){
+  const p=selectedPatient();if(!p)return patientDetailPage();
+  return {title:'Documents',subtitle:p.name,html:`
+    ${backBar(patientRoute('patient-detail',p.id),p.name)}
+    ${hero('Documents','The navigation and document categories are active. Cloud file storage will be connected later.')}
+    <div class="panel"><div class="menu-list">
+      ${menuCard('✍️','Consent Forms','Patient consent records','document-placeholder')}
+      ${menuCard('🧪','Lab Reports','Blood tests and other laboratory results','document-placeholder')}
+      ${menuCard('🩻','Imaging','MRI, X-ray and ultrasound reports','document-placeholder')}
+      ${menuCard('📨','Referrals','Referral and specialist letters','document-placeholder')}
+    </div></div>`};
+}
+async function documentPlaceholderPage(){return{title:'Document Category',subtitle:'Storage connection pending',html:`${backBar('patients','Patients')}${hero('Document Category','This button and navigation level are active. Secure cloud upload will be added with the database layer.')}<div class="notice">No patient document is uploaded or transmitted in this local build.</div>`};}
+
+async function bookingPage(){
+  const d=readStore();
+  return {title:'Booking',subtitle:'Booking hub',html:`
+    ${backBar('today','Dashboard')}
+    ${hero('Booking','Choose one booking function.')}
+    <div class="panel"><div class="menu-list">
+      ${menuCard('➕','New Booking','Create and save a new appointment','booking-new')}
+      ${menuCard('⏳','Pending Requests',`${d.appointments.filter(x=>x.status==='Pending').length} pending request(s)`,'booking-pending')}
+      ${menuCard('✅','Confirmed Appointments',`${d.appointments.filter(x=>x.status==='Confirmed').length} confirmed appointment(s)`,'booking-confirmed')}
+      ${menuCard('🕘','Appointment History','View all locally stored appointments','booking-history')}
+    </div></div>`};
+}
+async function bookingFilteredPage(status,title){
+  const d=readStore();const rows=status?d.appointments.filter(x=>x.status===status):d.appointments;
+  return {title,subtitle:'Appointment list',html:`${backBar('booking','Booking')}${hero(title,'Select an appointment action.')}<div class="panel">${rows.length?`<table><thead><tr><th>Patient</th><th>Date</th><th>Service</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${escapeHtml(x.patientName)}</td><td>${formatDate(x.date)} ${escapeHtml(x.time)}</td><td>${escapeHtml(x.service)}</td><td>${badge(x.status,x.status==='Pending'?'warning':'default')}</td><td><button class="button mini secondary" data-toggle-appointment="${x.id}">Toggle</button><button class="button mini danger" data-delete-appointment="${x.id}">Delete</button></td></tr>`).join('')}</tbody></table>`:empty('No appointments in this category.')}</div>`,mount(){document.querySelectorAll('[data-toggle-appointment]').forEach(b=>b.onclick=()=>{updateStore(d=>{const x=d.appointments.find(x=>x.id===b.dataset.toggleAppointment);x.status=x.status==='Pending'?'Confirmed':'Pending';});render();});document.querySelectorAll('[data-delete-appointment]').forEach(b=>b.onclick=()=>{updateStore(d=>d.appointments=d.appointments.filter(x=>x.id!==b.dataset.deleteAppointment));render();});}};
+}
+const bookingPendingPage=()=>bookingFilteredPage('Pending','Pending Requests');
+const bookingConfirmedPage=()=>bookingFilteredPage('Confirmed','Confirmed Appointments');
+const bookingHistoryPage=()=>bookingFilteredPage(null,'Appointment History');
+
+async function clinicalPage(){
+  const d=readStore();
+  return {title:'Clinical',subtitle:'Clinical hub',html:`
+    ${backBar('today','Dashboard')}
+    ${hero('Clinical','Choose a clinical work area.')}
+    <div class="panel"><div class="menu-list">
+      ${menuCard('➕','New Clinical Note','Create a practitioner-approved note','clinical-new')}
+      ${menuCard('📋','Clinical Notes',`${d.clinicalNotes.length} saved note(s)`,'clinical-notes')}
+      ${menuCard('🗓️','Today’s Visits','Open today’s appointments','clinical-today')}
+      ${menuCard('💉','Treatment Records','Review saved treatment fields','clinical-notes')}
+    </div></div>`};
+}
+async function clinicalNotesPage(){
+  const d=readStore();
+  return {title:'Clinical Notes',subtitle:'Saved practitioner notes',html:`${backBar('clinical','Clinical')}${hero('Clinical Notes','Select a saved record.')}<div class="panel">${d.clinicalNotes.length?d.clinicalNotes.slice().reverse().map(n=>{const p=d.patients.find(p=>p.id===n.patientId);return `<div class="record-row"><div><strong>${escapeHtml(p?.name||'Unknown patient')}</strong><small>${new Date(n.createdAt).toLocaleDateString()} · ${escapeHtml(n.chiefConcern||'Clinical note')}</small></div><button class="button secondary" data-open-clinical="${n.id}">Open ›</button></div>`}).join(''):empty('No clinical notes yet.')}</div>`,mount(){document.querySelectorAll('[data-open-clinical]').forEach(b=>b.onclick=()=>{const n=d.clinicalNotes.find(x=>x.id===b.dataset.openClinical);openModal(`<div class="panel-head"><h3>Clinical Note</h3><button class="button secondary" onclick="closeModal()">Close</button></div><p><b>Chief concern:</b> ${escapeHtml(n.chiefConcern||'—')}</p><p><b>Assessment:</b> ${escapeHtml(n.assessment||'—')}</p><p><b>Treatment:</b> ${escapeHtml(n.treatment||'—')}</p><p><b>Plan:</b> ${escapeHtml(n.plan||'—')}</p>`);});}};
+}
+async function clinicalTodayPage(){
+  const d=readStore(),today=new Date().toISOString().slice(0,10),rows=d.appointments.filter(x=>x.date===today);
+  return {title:"Today's Visits",subtitle:'Appointments scheduled today',html:`${backBar('clinical','Clinical')}${hero("Today's Visits",'Select a patient to continue.')}<div class="panel">${rows.length?rows.map(x=>menuCard('🩺',x.patientName,`${x.time} · ${x.service}`,'patient-list')).join(''):empty('No appointments scheduled for today.')}</div>`};
+}
+
+async function aiIntakeHubPage(){
+  const hasDraft=Object.keys(readDraft()).length>0;
+  return {title:'AI Intake',subtitle:'Choose an intake method',html:`
+    ${backBar('ai-care','AI Care')}
+    ${hero('AI Intake','Choose one entry method. Both methods lead to structured clinical data.')}
+    <div class="panel"><div class="menu-list">
+      ${menuCard('📝','Classic Health Form','Structured five-step health assessment','intake')}
+      ${menuCard('🤖','AI Conversation','Guided conversation-style assessment','ai-conversation')}
+      ${menuCard('🕓','Continue Draft',hasDraft?'A saved draft is available':'No saved draft currently','intake')}
+      ${menuCard('📚','Intake History','View completed assessment summaries','clinical-summary')}
+    </div></div>`};
+}
+async function aiConversationPage(){
+  return {title:'AI Conversation',subtitle:'Conversation intake',html:`
+    ${backBar('ai-intake','AI Intake')}
+    ${hero('AI Conversation','The conversation workflow is active and saves the patient’s free-text concern locally.')}
+    <div class="panel"><form id="ai-conversation-form">
+      <label>Patient Name *<input name="patientName" required placeholder="Full name"></label>
+      <label>Tell LINGGUANG what is happening<textarea name="message" required placeholder="For example: My right shoulder has hurt for two months..."></textarea></label>
+      <div class="button-row"><button class="button primary">Create Structured Draft</button></div>
+    </form></div>`,mount(){document.querySelector('#ai-conversation-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));const parts=v.patientName.trim().split(/\s+/);writeDraft({firstName:parts.shift()||'',lastName:parts.join(' '),phone:'To be completed',concerns:['Other'],notes:v.message,painScore:0,sleepScore:7,energyScore:6,stressScore:4});setStep(0);toast('Conversation converted into an intake draft');router.go('intake');};}};
+}
+
+async function settingsPage(){
+  return {title:'Settings',subtitle:'System preferences',html:`
+    ${backBar('today','Dashboard')}
+    ${hero('Settings','Mobile Navigation Edition preferences and information.')}
+    <div class="panel"><div class="menu-list">
+      ${menuCard('🌐','Language','English / 中文 workflow preparation','settings-language')}
+      ${menuCard('🔒','Privacy & Security','Local build privacy information','settings-privacy')}
+      ${menuCard('ℹ️','About','Version and build information','settings-about')}
+    </div></div>`};
+}
+async function settingsInfoPage(){
+ const kind=currentRouteInfo().route;
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Navigation Edition Build 001.';
+ return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
+}
+
+
 /* ===== src/shell.js ===== */
 function createAppShell() {
   return `
@@ -198,8 +486,9 @@ function createAppShell() {
           <button data-route="ai-care">🤖 AI Care</button>
           <button data-route="health-journey">📈 Health Journey</button>
           <button data-route="clinic">🏥 Clinic</button>
+          <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Full Project 1.3</div>
+        <div class="build-label">Navigation Build 001</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -218,46 +507,76 @@ function createAppShell() {
 /* ===== src/router.js ===== */
 const routes = {
   today: todayPage,
-  booking: bookingPage,
   patients: patientsPage,
+  'patient-new': patientNewPage,
+  'patient-list': patientListPage,
+  'patient-archived': patientArchivedPage,
+  'patient-detail': patientDetailPage,
+  'patient-basic': patientBasicPage,
+  'patient-bookings': patientBookingsPage,
+  'patient-clinical': patientClinicalPage,
+  'patient-ai': patientAiPage,
+  'patient-journey': patientJourneyPage,
+  'patient-remote': patientRemotePage,
+  'patient-documents': patientDocumentsPage,
+  'document-placeholder': documentPlaceholderPage,
+  booking: bookingPage,
+  'booking-new': bookingFormPage,
+  'booking-pending': bookingPendingPage,
+  'booking-confirmed': bookingConfirmedPage,
+  'booking-history': bookingHistoryPage,
   clinical: clinicalPage,
+  'clinical-new': clinicalNewNotePage,
+  'clinical-notes': clinicalNotesPage,
+  'clinical-today': clinicalTodayPage,
   'ai-care': aiCarePage,
-  intake: intakePage,
+  'ai-intake': aiIntakeHubPage,
+  intake: classicIntakePage,
+  'ai-conversation': aiConversationPage,
   'clinical-summary': clinicalSummaryPage,
   'health-analysis': healthAnalysisPage,
   'remote-care': remoteCarePage,
   'follow-up': followUpPage,
   'risk-review': riskReviewPage,
   'health-journey': healthJourneyPage,
-  clinic: clinicPage
+  clinic: clinicPage,
+  settings: settingsPage,
+  'settings-language': settingsInfoPage,
+  'settings-privacy': settingsInfoPage,
+  'settings-about': settingsInfoPage
 };
 
-function currentRoute() {
-  return location.hash.replace('#/', '') || 'today';
+function currentRouteInfo(){
+  const raw=location.hash.replace('#/','')||'today';
+  const [route,query='']=raw.split('?');
+  return {route,params:new URLSearchParams(query)};
 }
+function currentRoute(){return currentRouteInfo().route;}
 
-async function render() {
-  const route = currentRoute();
-  const page = routes[route] || routes.today;
-  const result = await page();
-  document.querySelector('#page-title').textContent = result.title;
-  document.querySelector('#page-subtitle').textContent = result.subtitle;
-  document.querySelector('#page-root').innerHTML = result.html;
-  document.querySelectorAll('[data-route]').forEach(btn => btn.classList.toggle('active', btn.dataset.route === route));
+async function render(){
+  const info=currentRouteInfo();
+  routeParams=info.params;
+  const route=info.route;
+  const page=routes[route]||routes.today;
+  const result=await page();
+  document.querySelector('#page-title').textContent=result.title;
+  document.querySelector('#page-subtitle').textContent=result.subtitle;
+  document.querySelector('#page-root').innerHTML=result.html;
+  document.querySelectorAll('[data-route]').forEach(btn=>btn.classList.toggle('active',btn.dataset.route.split('?')[0]===route));
   result.mount?.();
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  window.scrollTo({top:0,behavior:'instant'});
 }
 
-const router = {
-  start() {
-    document.addEventListener('click', event => {
-      const trigger = event.target.closest('[data-route]');
-      if (trigger) location.hash = `#/${trigger.dataset.route}`;
+const router={
+  start(){
+    document.addEventListener('click',event=>{
+      const trigger=event.target.closest('[data-route]');
+      if(trigger)location.hash=`#/${trigger.dataset.route}`;
     });
-    addEventListener('hashchange', render);
+    addEventListener('hashchange',render);
     render();
   },
-  go(route) { location.hash = `#/${route}`; }
+  go(route){location.hash=`#/${route}`;}
 };
 
 

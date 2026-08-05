@@ -1,21 +1,22 @@
-# LINGGUANG Health OS — Mobile GitHub Upload 1.3.1
+# LINGGUANG Health OS — Navigation Edition Build 001
 
-This package is optimized for uploading from an iPhone.
+手机友好的四文件 GitHub 上传版。
 
-## Upload these four files to the root of one GitHub repository
-- `index.html`
-- `app.js`
-- `styles.css`
-- `README.md`
+## 本版核心
+- Dashboard 的统计数字只显示信息，不作为隐藏入口
+- 所有进入下一层的操作都使用清晰按钮
+- Patients：Hub → Patient List → Patient Detail → Basic / Booking / Clinical / AI / Journey / Remote Care / Documents
+- Booking：Hub → New / Pending / Confirmed / History
+- Clinical：Hub → New Note / Notes / Today's Visits / Treatment Records
+- AI Care：Hub → AI Intake → Classic Form / AI Conversation / Draft / History
+- 每一级提供返回按钮
+- 数据继续保存在当前浏览器 localStorage
 
-There is no outer project folder inside the ZIP and no nested source folders to upload.
+## GitHub 手机上传
+上传根目录中的：
+- index.html
+- app.js
+- styles.css
+- README.md
 
-## GitHub Pages
-After uploading, open repository **Settings → Pages**, choose **Deploy from a branch**, select `main` and `/ (root)`, then save.
-
-## Current technical boundary
-This is a browser-based working build. It uses local browser storage. Cloud accounts, Supabase, live GPT API, SMS/email, and production medical compliance are not yet connected.
-
-
-## White-screen fix
-Removed leftover module import statements from the bundled JavaScript and added cache-busting file versions for GitHub Pages.
+本地版尚未连接 Supabase、正式登录、GPT API、短信或生产级医疗数据合规系统。
