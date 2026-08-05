@@ -1,4 +1,4 @@
-/* LINGGUANG Health OS Mobile GitHub bundle 1.3 */
+/* LINGGUANG Health OS Mobile GitHub bundle 1.3.1 */
 "use strict";
 
 /* ===== src/services/store.js ===== */
@@ -147,37 +147,37 @@ async function intakePage(){return{title:'AI Intake',subtitle:'Patient health as
 
 
 /* ===== src/pages/clinicalSummary.js ===== */
-import { hero,empty,badge } from './shared.js';import { escapeHtml } from '../services/ui.js';
+
 async function clinicalSummaryPage(){const d=readStore();return{title:'Clinical Summary',subtitle:'Structured intake summaries',html:`${hero('Clinical Summary','Structured summaries generated from completed intake records.')}<div class="stack">${d.intakes.length?d.intakes.slice().reverse().map(i=>`<article class="panel"><div class="panel-head"><h3>${escapeHtml(i.patientName)}</h3>${badge('Ready')}</div><div class="summary-box"><p><b>Primary concerns:</b> ${escapeHtml(i.concerns.join(', '))}</p><p>${escapeHtml(i.summary)}</p><p><b>TCM observations:</b> ${escapeHtml(i.tcmSummary)}</p>${i.risks.length?`<p class="risk-text"><b>Review flags:</b> ${escapeHtml(i.risks.join('; '))}</p>`:''}</div><button class="button primary" data-route="clinical">Open Clinical Workspace</button></article>`).join(''):empty('No completed intake summaries.')}</div>`}};
 
 
 /* ===== src/pages/healthAnalysis.js ===== */
-import { hero } from './shared.js';
+
 async function healthAnalysisPage(){const d=readStore(),v=d.checkins,avg=k=>v.length?(v.reduce((s,x)=>s+Number(x[k]||0),0)/v.length).toFixed(1):'—';const items=[['Pain burden',avg('pain')],['Sleep quality',avg('sleep')],['Energy',avg('energy')]];return{title:'Health Analysis',subtitle:'Pain, sleep, energy, and activity trends',html:`${hero('Health Analysis','Review trends from Remote Care check-ins.')}<div class="stats-grid"><div class="stat-card"><span>Average Pain</span><strong>${avg('pain')}</strong></div><div class="stat-card"><span>Average Sleep</span><strong>${avg('sleep')}</strong></div><div class="stat-card"><span>Average Energy</span><strong>${avg('energy')}</strong></div><div class="stat-card"><span>Check-ins</span><strong>${v.length}</strong></div></div><div class="panel">${items.map(([n,x])=>`<div class="progress-row"><div><b>${n}</b><span>${x==='—'?'No data':x+'/10'}</span></div><div class="progress"><i style="width:${x==='—'?0:Number(x)*10}%"></i></div></div>`).join('')}</div>`}};
 
 
 /* ===== src/pages/remoteCare.js ===== */
-import { hero,empty } from './shared.js';import { toast,escapeHtml } from '../services/ui.js';
+
 async function remoteCarePage(){const d=readStore(),opts=d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');return{title:'Remote Care',subtitle:'Daily check-ins and care-plan progress',html:`${hero('Remote Care','Record daily pain, sleep, energy, and notes.')}<div class="panel"><form id="checkin-form" class="form-grid"><label>Patient<select name="patientId">${opts||'<option value="">No patients yet</option>'}</select></label><label>Pain 0–10<input type="number" name="pain" min="0" max="10" value="3"></label><label>Sleep 0–10<input type="number" name="sleep" min="0" max="10" value="7"></label><label>Energy 0–10<input type="number" name="energy" min="0" max="10" value="6"></label><label class="wide">Daily Note<textarea name="note"></textarea></label><div class="form-action"><button class="button primary">Save Check-in</button></div></form></div><div class="panel">${d.checkins.length?`<table><thead><tr><th>Date</th><th>Patient</th><th>Pain</th><th>Sleep</th><th>Energy</th></tr></thead><tbody>${d.checkins.slice().reverse().map(c=>`<tr><td>${new Date(c.createdAt).toLocaleDateString()}</td><td>${escapeHtml(c.patientName)}</td><td>${c.pain}</td><td>${c.sleep}</td><td>${c.energy}</td></tr>`).join('')}</tbody></table>`:empty('No daily check-ins.')}</div>`,mount(){document.querySelector('#checkin-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));const p=d.patients.find(p=>p.id===v.patientId);if(!p)return toast('Select a patient');updateStore(s=>s.checkins.push({id:crypto.randomUUID(),patientName:p.name,createdAt:new Date().toISOString(),...v}));toast('Daily check-in saved');location.reload();};}}}
 
 
 /* ===== src/pages/followUp.js ===== */
-import { hero,empty,badge } from './shared.js';import { toast,escapeHtml,formatDate } from '../services/ui.js';
+
 async function followUpPage(){const d=readStore(),opts=d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');return{title:'Follow-up',subtitle:'Reminders and follow-up questions',html:`${hero('Follow-up','Create and complete follow-up tasks.')}<div class="panel"><form id="follow-form" class="form-grid"><label>Patient<select name="patientId">${opts||'<option value="">No patients yet</option>'}</select></label><label>Due Date<input type="date" name="dueDate" required></label><label class="wide">Task<input name="task" required placeholder="Check pain response after treatment"></label><div class="form-action"><button class="button primary">Add Follow-up</button></div></form></div><div class="panel">${d.followups.length?`<table><thead><tr><th>Patient</th><th>Task</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>${d.followups.map(f=>`<tr><td>${escapeHtml(f.patientName)}</td><td>${escapeHtml(f.task)}</td><td>${formatDate(f.dueDate)}</td><td>${badge(f.done?'Completed':'Open',f.done?'default':'warning')}</td><td><button class="button mini secondary" data-toggle-follow="${f.id}">${f.done?'Reopen':'Complete'}</button></td></tr>`).join('')}</tbody></table>`:empty('No follow-up tasks.')}</div>`,mount(){document.querySelector('#follow-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));const p=d.patients.find(p=>p.id===v.patientId);if(!p)return toast('Select a patient');updateStore(s=>s.followups.push({id:crypto.randomUUID(),patientName:p.name,done:false,...v}));toast('Follow-up added');location.reload();};document.querySelectorAll('[data-toggle-follow]').forEach(b=>b.onclick=()=>{updateStore(s=>{const f=s.followups.find(x=>x.id===b.dataset.toggleFollow);f.done=!f.done;});location.reload();});}}}
 
 
 /* ===== src/pages/riskReview.js ===== */
-import { hero,empty,badge } from './shared.js';import { escapeHtml } from '../services/ui.js';
+
 async function riskReviewPage(){const d=readStore(),risks=d.intakes.flatMap(i=>i.risks.map(r=>({name:i.patientName,reason:r})));return{title:'Risk Review',subtitle:'Information needing human review',html:`${hero('Risk Review','Human review queue created from intake answers.')}<div class="stack">${risks.length?risks.map(r=>`<article class="panel"><div class="panel-head"><h3>${escapeHtml(r.name)}</h3>${badge('Review','danger')}</div><p>${escapeHtml(r.reason)}</p><button class="button secondary">Mark Reviewed</button></article>`).join(''):empty('No current risk flags.')}</div><div class="notice danger">These are screening prompts, not diagnoses. Urgent symptoms require appropriate emergency assessment.</div>`}};
 
 
 /* ===== src/pages/healthJourney.js ===== */
-import { hero,empty } from './shared.js';
+
 async function healthJourneyPage(){const d=readStore(),last=d.checkins.at(-1);return{title:'Health Journey',subtitle:'Long-term health and recovery progress',html:`${hero('Health Journey','Long-term change, presented clearly for the patient and practitioner.')}<div class="panel">${last?[['Pain improvement',10-Number(last.pain)],['Sleep quality',Number(last.sleep)],['Energy',Number(last.energy)]].map(([n,v])=>`<div class="progress-row"><div><b>${n}</b><span>${v}/10</span></div><div class="progress"><i style="width:${v*10}%"></i></div></div>`).join(''):empty('Add a Remote Care check-in to begin the Health Journey.')}</div>`}};
 
 
 /* ===== src/pages/clinic.js ===== */
-import { hero } from './shared.js';import { toast } from '../services/ui.js';
+
 async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'Clinic operations and local data',html:`${hero('Clinic Intelligence','Operational information based on locally stored records.')}<div class="stats-grid"><div class="stat-card"><span>Patients</span><strong>${d.patients.length}</strong></div><div class="stat-card"><span>Appointments</span><strong>${d.appointments.length}</strong></div><div class="stat-card"><span>Clinical Notes</span><strong>${d.clinicalNotes.length}</strong></div><div class="stat-card"><span>Check-ins</span><strong>${d.checkins.length}</strong></div></div><div class="panel"><h3>Local Data Controls</h3><p>This development build stores data in the current browser.</p><button class="button danger" id="reset-data">Reset All Local Data</button></div>`,mount(){document.querySelector('#reset-data').onclick=()=>{if(confirm('Reset all local LINGGUANG data?')){resetStore();toast('Local data reset');location.reload();}};}}}
 
 
