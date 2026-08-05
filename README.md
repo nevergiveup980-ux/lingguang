@@ -1,22 +1,27 @@
-# LINGGUANG Health OS Integrated 1.1
+# LINGGUANG Health OS Integrated 1.2
 
-This package merges Preview 1.0 with Patient Intake V0.0.1.
+This version keeps the original dashboard and top navigation as the system home.
 
-## Working functions
-- All main navigation buttons
-- Booking creation, confirmation and deletion
-- Patient intake wizard with auto-save
-- Patient list and patient details
+## Integrated workflow
+Dashboard → AI Care → AI Intake → Patient Assessment → Clinical Summary → Clinical Workspace
+
+## Working features
+- Original navigation dashboard preserved
+- Booking add, confirm/pending, and delete
+- Patient list created from completed intake
+- Five-step intake with automatic local draft saving
 - Structured clinical summaries
-- Clinical-note generation and saving
-- Remote-care daily check-ins
-- Health trend analysis
-- Follow-up task creation/completion
-- Rule-based risk flags and review
-- Health Journey and Clinic dashboards
-- Browser localStorage persistence
+- Transfer summary into clinical notes
+- Clinical-note saving
+- Health Analysis based on check-ins
+- Remote Care daily check-ins
+- Follow-up creation and completion
+- Risk Review flags
+- Health Journey display
+- Clinic statistics
+- Browser local storage
 
-## Important limitation
-This is a fully interactive offline/local web application, not yet a cloud production system. Data is stored only in the browser on the current device. External GPT/API, authentication, encrypted cloud database, SMS/email and multi-device syncing are not connected in this release.
+## Open
+Unzip and open `index.html`.
 
-Open `index.html` to run.
+This is a local working edition. Data remains in the browser/device where it is opened. Cloud sync, login, SMS/email, and live GPT API are not yet connected.
