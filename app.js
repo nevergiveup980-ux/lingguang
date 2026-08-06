@@ -198,7 +198,7 @@ async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'
 
 
 
-/* ===== Platform Build 004 ===== */
+/* ===== Brand Build 006 ===== */
 const PLATFORM_ROLE_KEY='lingguang-platform-role-v4';
 const PLATFORM_USER_KEY='lingguang-platform-user-v4';
 
@@ -223,7 +223,7 @@ async function platformEntryPage(){
   return {title:'LINGGUANG',subtitle:'Choose your portal',html:`
     <section class="platform-entry-page">
       <div class="platform-entry-brand">
-        <img src="lingguang-logo.png?v=2.1.0-platform004" alt="LINGGUANG">
+        <img src="lingguang-logo-full.png?v=2.3.0-brand006" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
         <strong>LINGGUANG</strong><span>Health OS</span>
         <p>AI-powered integrative healthcare platform</p>
       </div>
@@ -249,7 +249,7 @@ async function roleLoginPage(){
   return {title,subtitle:'Secure portal entry',html:`
     ${backBar('platform-entry','Portal Selection')}
     <section class="role-login-wrap"><div class="role-login-card">
-      <img src="lingguang-logo.png?v=2.1.0-platform004" alt="">
+      <img src="lingguang-logo-full.png?v=2.3.0-brand006" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
       <span class="role-login-type">${title}</span><h2>Welcome</h2>
       <form id="role-login-form">
         ${role==='patient'?`
@@ -983,7 +983,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Platform Build 004 · Booking Calendar Build 002 · Local AI Beta 001.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Brand Build 006 · Booking Calendar Build 002 · Local AI Beta 001.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -1141,9 +1141,9 @@ function shell(){
   document.body.innerHTML=`
     <div class="app-shell">
       <aside class="sidebar">
-        <button type="button" class="brand brand-button" data-route="settings-about" aria-label="About LINGGUANG Health OS">
-          <img class="brand-logo-image" src="lingguang-logo.png?v=2.0.0-ui003" alt="LINGGUANG logo">
-          <span><strong>LINGGUANG</strong><small>Health OS</small></span>
+        <button type="button" class="brand brand-button" id="brand-home-button" aria-label="About LINGGUANG Health OS">
+          <img class="brand-logo-image" src="lingguang-logo.png?v=2.3.0-brand006" alt="LINGGUANG official logo">
+          <span><strong>LINGGUANG HEALTH</strong><small>Health OS</small></span>
         </button>
         <nav class="main-nav">
           <button data-route="today">🏠 Today</button>
@@ -1155,7 +1155,7 @@ function shell(){
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Platform Build 004</div>
+        <div class="build-label">Brand Build 006</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -1179,8 +1179,8 @@ function shell(){
     <div class="brand-splash" id="brand-splash" aria-hidden="true">
       <div class="brand-splash-atmosphere"></div>
       <div class="brand-splash-card">
-        <img src="lingguang-logo.png?v=2.0.0-ui003" alt="">
-        <strong>LINGGUANG</strong>
+        <img src="lingguang-logo-full.png?v=2.3.0-brand006" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
+        <strong>LINGGUANG HEALTH</strong>
         <span>Health OS</span>
         <small>科技赋能 · 用心守护健康</small>
         <div class="splash-progress"><i></i></div>
@@ -1190,7 +1190,7 @@ function shell(){
     <div class="login-screen" id="login-screen" hidden>
       <div class="login-panel">
         <div class="login-brand">
-          <img src="lingguang-logo.png?v=2.0.0-ui003" alt="">
+          <img src="lingguang-logo-full.png?v=2.3.0-brand006" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
           <strong>LINGGUANG</strong>
           <span>Health OS</span>
         </div>
@@ -1282,8 +1282,14 @@ async function render(){
   const back=document.querySelector('#global-back-button'),parent=parentRoute(route,routeParams);
   if(back){back.hidden=!parent;back.onclick=()=>parent&&router.go(parent)}
   document.querySelectorAll('[data-route]').forEach(b=>b.classList.toggle('active',b.dataset.route.split('?')[0]===route));
-  result.mount?.();window.scrollTo({top:0,behavior:'instant'});
+  bindBrandHome();result.mount?.();window.scrollTo({top:0,behavior:'instant'});
 }
+
+function bindBrandHome(){
+  const brand=document.querySelector('#brand-home-button');
+  if(brand)brand.onclick=()=>router.go(roleHome(platformRole()));
+}
+
 const router={go(route){location.hash=`#/${route}`},start(){
   document.addEventListener('click',e=>{const b=e.target.closest('[data-route]');if(b){e.preventDefault();router.go(b.dataset.route)}});
   addEventListener('hashchange',render);render();
