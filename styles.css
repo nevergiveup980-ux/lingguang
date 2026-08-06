@@ -417,3 +417,49 @@
   }
   .brand strong{font-size:12px!important}
 }
+
+
+/* Brand Icon Build 008 — transparent gold emblem */
+.brand-logo-image{
+  width:64px!important;
+  height:64px!important;
+  min-width:64px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  background:transparent!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  filter:
+    drop-shadow(0 4px 7px rgba(0,0,0,.24))
+    drop-shadow(0 0 3px rgba(225,183,66,.20))!important;
+}
+.brand{
+  gap:11px!important;
+}
+.brand strong{
+  font-size:13px!important;
+  line-height:1.15!important;
+  letter-spacing:.035em!important;
+  color:#fff!important;
+}
+.brand small{
+  color:#b9d8cc!important;
+  font-size:11px!important;
+  margin-top:4px!important;
+}
+@media(max-width:900px){
+  .brand-logo-image{
+    width:62px!important;
+    height:62px!important;
+    min-width:62px!important;
+  }
+}
+@media(max-width:560px){
+  .brand-logo-image{
+    width:60px!important;
+    height:60px!important;
+    min-width:60px!important;
+  }
+}
