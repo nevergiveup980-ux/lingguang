@@ -1,21 +1,16 @@
-# LINGGUANG Health OS — Local AI Beta 001
+# LINGGUANG Health OS — Booking Calendar Build 002
 
-## New in this build
-- Real browser-based local language-model integration using WebLLM.
-- WebGPU capability detection.
-- Optional download/load of `SmolLM2-360M-Instruct-q4f32_1-MLC`.
-- Model loading progress display.
-- Browser model cache and unload controls.
-- Local symptom category, location, duration, pattern and missing-question extraction.
-- AI Conversation uses the local model when loaded.
-- Automatic local rule-engine fallback when the model is unavailable.
-- No GPT API is used by the Local AI feature.
-- Existing brand, navigation, back buttons, intake, booking, patients, clinical and AI Care are retained.
-
-## Important
-The app files are small, but the AI model is downloaded separately on first use and cached by the browser. Device storage, memory, speed and compatibility vary.
-
-This beta is not a production medical-record system and does not diagnose or replace practitioner review.
+## Booking upgrade
+- Month view with appointment counts and event chips.
+- Week view from Monday through Sunday with hourly slots.
+- Day view with a 7:00–21:00 time line.
+- Month / Week / Day switch.
+- Today, previous and next controls.
+- Tap a date to open its day view.
+- Tap an empty week/day time slot to prefill a new appointment.
+- Tap an existing appointment to review details, confirm, complete or delete.
+- New appointments return directly to the selected day.
+- Existing navigation, return buttons, branding and Local AI Beta 001 are retained.
 
 ## Mobile GitHub upload
 Upload or replace:
@@ -26,3 +21,5 @@ Upload or replace:
 - README.md
 - lingguang-logo.png
 - favicon.png
+
+This remains a browser-local development build and is not yet a production clinical scheduling system.

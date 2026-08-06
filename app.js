@@ -108,19 +108,30 @@ async function todayPage() {
 /* ===== src/pages/booking.js ===== */
 async function bookingFormPage() {
   const d = readStore();
-  return { title:'Booking', subtitle:'Smart booking and appointment requests', html:`
-    ${hero('Smart Booking','Create, confirm, and manage appointment requests.')}
+  const requestedDate=routeParams.get('date')||calendarTodayISO();
+  const patientId=routeParams.get('patient')||'';
+  const selectedPatient=d.patients.find(p=>p.id===patientId);
+  return { title:'New Booking', subtitle:'Create an appointment', html:`
+    ${backBar('booking','Booking')}
+    ${hero('New Booking','Save an appointment and return directly to the calendar.')}
     <div class="panel"><form id="booking-form" class="form-grid">
-      <label>Patient Name<input name="patientName" required></label><label>Date<input type="date" name="date" required></label>
-      <label>Time<input type="time" name="time" required></label><label>Service<select name="service"><option>Follow-up Acupuncture</option><option>Initial Consultation</option><option>Pain Assessment</option><option>Wellness Consultation</option></select></label>
-      <label>Status<select name="status"><option>Pending</option><option>Confirmed</option></select></label><div class="form-action"><button class="button primary">Save Appointment</button></div>
-    </form></div>
-    <div class="panel"><div class="panel-head"><h3>Appointments</h3><span>${d.appointments.length}</span></div><div id="appointment-list">
-    ${d.appointments.length ? `<table><thead><tr><th>Patient</th><th>Date</th><th>Service</th><th>Status</th><th></th></tr></thead><tbody>${d.appointments.map(x=>`<tr><td>${escapeHtml(x.patientName)}</td><td>${formatDate(x.date)} ${escapeHtml(x.time)}</td><td>${escapeHtml(x.service)}</td><td>${badge(x.status,x.status==='Pending'?'warning':'default')}</td><td><button class="button mini secondary" data-toggle-appointment="${x.id}">Toggle</button><button class="button mini danger" data-delete-appointment="${x.id}">Delete</button></td></tr>`).join('')}</tbody></table>` : empty('No appointments saved.')}</div></div>`,
+      <label>Patient Name<input name="patientName" required value="${escapeHtml(selectedPatient?.name||'')}"></label>
+      <label>Date<input type="date" name="date" required value="${escapeHtml(requestedDate)}"></label>
+      <label>Time<input type="time" name="time" required value="${escapeHtml(routeParams.get('time')||'09:00')}"></label>
+      <label>Duration<select name="duration"><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label>
+      <label>Service<select name="service"><option>Follow-up Acupuncture</option><option>Initial Consultation</option><option>Pain Assessment</option><option>Wellness Consultation</option></select></label>
+      <label>Status<select name="status"><option>Pending</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select></label>
+      <label class="wide">Notes<textarea name="notes" placeholder="Optional booking note"></textarea></label>
+      <div class="form-action"><button class="button primary">Save Appointment</button></div>
+    </form></div>`,
     mount(){
-      document.querySelector('#booking-form').addEventListener('submit',e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));updateStore(d=>d.appointments.push({id:crypto.randomUUID(),...v}));toast('Appointment saved');bookingPage().then(p=>{document.querySelector('#page-root').innerHTML=p.html;p.mount();});});
-      document.querySelectorAll('[data-toggle-appointment]').forEach(b=>b.onclick=()=>{updateStore(d=>{const x=d.appointments.find(x=>x.id===b.dataset.toggleAppointment);x.status=x.status==='Pending'?'Confirmed':'Pending';});location.reload();});
-      document.querySelectorAll('[data-delete-appointment]').forEach(b=>b.onclick=()=>{updateStore(d=>d.appointments=d.appointments.filter(x=>x.id!==b.dataset.deleteAppointment));location.reload();});
+      document.querySelector('#booking-form').addEventListener('submit',e=>{
+        e.preventDefault();
+        const v=Object.fromEntries(new FormData(e.currentTarget));
+        updateStore(store=>store.appointments.push({id:crypto.randomUUID(),...v}));
+        toast('Appointment saved');
+        router.go(`booking-calendar?view=day&date=${encodeURIComponent(v.date)}`);
+      });
     }
   };
 }
@@ -389,12 +400,230 @@ async function patientDocumentsPage(){
 }
 async function documentPlaceholderPage(){return{title:'Document Category',subtitle:'Storage connection pending',html:`${backBar('patients','Patients')}${hero('Document Category','This button and navigation level are active. Secure cloud upload will be added with the database layer.')}<div class="notice">No patient document is uploaded or transmitted in this local build.</div>`};}
 
+
+/* ===== Booking Calendar Build 002 ===== */
+const CALENDAR_STATE_KEY='lingguang-booking-calendar-state-v2';
+
+function calendarTodayISO(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function calendarParseISO(value){
+  const match=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!match)return new Date();
+  return new Date(Number(match[1]),Number(match[2])-1,Number(match[3]),12,0,0,0);
+}
+function calendarISO(date){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+function calendarAddDays(value,days){
+  const d=calendarParseISO(value);d.setDate(d.getDate()+days);return calendarISO(d);
+}
+function calendarAddMonths(value,months){
+  const d=calendarParseISO(value);d.setDate(1);d.setMonth(d.getMonth()+months);return calendarISO(d);
+}
+function calendarStartMonday(value){
+  const d=calendarParseISO(value);
+  const offset=(d.getDay()+6)%7;
+  d.setDate(d.getDate()-offset);
+  return calendarISO(d);
+}
+function calendarMonthTitle(value){
+  return calendarParseISO(value).toLocaleDateString('en-CA',{month:'long',year:'numeric'});
+}
+function calendarDayTitle(value){
+  return calendarParseISO(value).toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+}
+function calendarShortDay(value){
+  return calendarParseISO(value).toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
+}
+function calendarAppointmentsOn(date,appointments=readStore().appointments){
+  return appointments.filter(a=>a.date===date).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+}
+function calendarTone(status){
+  if(status==='Confirmed')return 'confirmed';
+  if(status==='Pending')return 'pending';
+  if(status==='Completed')return 'completed';
+  if(status==='Cancelled')return 'cancelled';
+  return 'default';
+}
+function calendarLoadState(){
+  try{return JSON.parse(localStorage.getItem(CALENDAR_STATE_KEY))||{view:'month',date:calendarTodayISO()}}
+  catch{return{view:'month',date:calendarTodayISO()}}
+}
+function calendarSaveState(view,date){
+  localStorage.setItem(CALENDAR_STATE_KEY,JSON.stringify({view,date}));
+}
+function calendarRoute(view,date){
+  return `booking-calendar?view=${encodeURIComponent(view)}&date=${encodeURIComponent(date)}`;
+}
+function calendarAppointmentChip(a,compact=false){
+  return `<button type="button" class="calendar-event ${calendarTone(a.status)} ${compact?'compact':''}" data-calendar-appointment="${a.id}">
+    <span class="calendar-event-time">${escapeHtml(a.time||'—')}</span>
+    <span class="calendar-event-name">${escapeHtml(a.patientName)}</span>
+    ${compact?'':`<small>${escapeHtml(a.service||'Appointment')}</small>`}
+  </button>`;
+}
+function calendarControls(view,date,title){
+  return `<div class="calendar-toolbar">
+    <div class="calendar-nav-actions">
+      <button type="button" class="button secondary" data-calendar-move="-1">‹</button>
+      <button type="button" class="button secondary" data-calendar-today>Today</button>
+      <button type="button" class="button secondary" data-calendar-move="1">›</button>
+    </div>
+    <h3>${escapeHtml(title)}</h3>
+    <div class="calendar-view-switch" role="group" aria-label="Calendar view">
+      <button type="button" class="${view==='month'?'active':''}" data-calendar-view="month">Month</button>
+      <button type="button" class="${view==='week'?'active':''}" data-calendar-view="week">Week</button>
+      <button type="button" class="${view==='day'?'active':''}" data-calendar-view="day">Day</button>
+    </div>
+  </div>`;
+}
+function calendarMonthHTML(date,appointments){
+  const focus=calendarParseISO(date);
+  const first=new Date(focus.getFullYear(),focus.getMonth(),1,12);
+  const gridStart=new Date(first);
+  gridStart.setDate(first.getDate()-((first.getDay()+6)%7));
+  const weekdays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let cells='';
+  for(let i=0;i<42;i++){
+    const d=new Date(gridStart);d.setDate(gridStart.getDate()+i);
+    const iso=calendarISO(d);
+    const rows=calendarAppointmentsOn(iso,appointments);
+    const outside=d.getMonth()!==focus.getMonth();
+    const today=iso===calendarTodayISO();
+    const selected=iso===date;
+    cells+=`<div class="calendar-month-cell ${outside?'outside':''} ${today?'today':''} ${selected?'selected':''}">
+      <button type="button" class="calendar-date-button" data-calendar-date="${iso}">
+        <span>${d.getDate()}</span>${rows.length?`<b>${rows.length}</b>`:''}
+      </button>
+      <div class="calendar-cell-events">
+        ${rows.slice(0,3).map(a=>calendarAppointmentChip(a,true)).join('')}
+        ${rows.length>3?`<button type="button" class="calendar-more" data-calendar-date="${iso}">+${rows.length-3} more</button>`:''}
+      </div>
+    </div>`;
+  }
+  return `<div class="calendar-month-scroll"><div class="calendar-month">
+    ${weekdays.map(x=>`<div class="calendar-weekday">${x}</div>`).join('')}
+    ${cells}
+  </div></div>`;
+}
+function calendarWeekHTML(date,appointments){
+  const start=calendarStartMonday(date);
+  const days=Array.from({length:7},(_,i)=>calendarAddDays(start,i));
+  const hours=Array.from({length:13},(_,i)=>i+7);
+  return `<div class="calendar-week-scroll"><div class="calendar-week">
+    <div class="calendar-week-corner"></div>
+    ${days.map(day=>`<button type="button" class="calendar-week-header ${day===calendarTodayISO()?'today':''}" data-calendar-date="${day}"><strong>${calendarParseISO(day).toLocaleDateString('en-CA',{weekday:'short'})}</strong><span>${calendarParseISO(day).getDate()}</span></button>`).join('')}
+    ${hours.map(hour=>{
+      const hourLabel=`${String(hour).padStart(2,'0')}:00`;
+      return `<div class="calendar-hour-label">${hourLabel}</div>${days.map(day=>{
+        const rows=calendarAppointmentsOn(day,appointments).filter(a=>Number((a.time||'00').slice(0,2))===hour);
+        return `<button type="button" class="calendar-week-slot" data-calendar-new="${day}|${hourLabel}">
+          ${rows.map(a=>calendarAppointmentChip(a,true)).join('')}
+        </button>`;
+      }).join('')}`;
+    }).join('')}
+  </div></div>`;
+}
+function calendarDayHTML(date,appointments){
+  const rows=calendarAppointmentsOn(date,appointments);
+  const hours=Array.from({length:15},(_,i)=>i+7);
+  return `<div class="calendar-day">
+    <div class="calendar-day-summary">
+      <strong>${rows.length}</strong><span>appointment${rows.length===1?'':'s'}</span>
+      <button type="button" class="button primary" data-route="booking-new?date=${encodeURIComponent(date)}">New Appointment</button>
+    </div>
+    <div class="calendar-day-timeline">
+      ${hours.map(hour=>{
+        const hourLabel=`${String(hour).padStart(2,'0')}:00`;
+        const inHour=rows.filter(a=>Number((a.time||'00').slice(0,2))===hour);
+        return `<div class="calendar-day-hour">
+          <div class="calendar-day-time">${hourLabel}</div>
+          <button type="button" class="calendar-day-slot" data-calendar-new="${date}|${hourLabel}">
+            ${inHour.map(a=>calendarAppointmentChip(a,false)).join('')}
+            ${inHour.length===0?'<span class="calendar-empty-slot">Tap to book</span>':''}
+          </button>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+function calendarOpenAppointment(id){
+  const d=readStore();
+  const a=d.appointments.find(x=>x.id===id);
+  if(!a)return toast('Appointment not found');
+  openModal(`<div class="panel-head"><h3>Appointment</h3><button class="button secondary" onclick="closeModal()">Close</button></div>
+    <div class="appointment-detail">
+      <p><b>Patient:</b> ${escapeHtml(a.patientName)}</p>
+      <p><b>Date:</b> ${formatDate(a.date)}</p>
+      <p><b>Time:</b> ${escapeHtml(a.time||'—')}</p>
+      <p><b>Duration:</b> ${escapeHtml(a.duration||'30')} minutes</p>
+      <p><b>Service:</b> ${escapeHtml(a.service||'—')}</p>
+      <p><b>Status:</b> ${escapeHtml(a.status||'—')}</p>
+      <p><b>Notes:</b> ${escapeHtml(a.notes||'None')}</p>
+    </div>
+    <div class="button-row">
+      <button class="button primary" onclick="calendarSetAppointmentStatus('${a.id}','Confirmed')">Confirm</button>
+      <button class="button secondary" onclick="calendarSetAppointmentStatus('${a.id}','Completed')">Complete</button>
+      <button class="button danger" onclick="calendarDeleteAppointment('${a.id}')">Delete</button>
+    </div>`);
+}
+window.calendarSetAppointmentStatus=(id,status)=>{
+  updateStore(d=>{const a=d.appointments.find(x=>x.id===id);if(a)a.status=status});
+  closeModal();toast(`Appointment marked ${status.toLowerCase()}`);render();
+};
+window.calendarDeleteAppointment=id=>{
+  if(!confirm('Delete this appointment?'))return;
+  updateStore(d=>d.appointments=d.appointments.filter(x=>x.id!==id));
+  closeModal();toast('Appointment deleted');render();
+};
+
+async function bookingCalendarPage(){
+  const stored=calendarLoadState();
+  const view=['month','week','day'].includes(routeParams.get('view'))?routeParams.get('view'):stored.view;
+  const date=/^\d{4}-\d{2}-\d{2}$/.test(routeParams.get('date')||'')?routeParams.get('date'):stored.date;
+  calendarSaveState(view,date);
+  const appointments=readStore().appointments;
+  const title=view==='month'?calendarMonthTitle(date):view==='week'?`${calendarShortDay(calendarStartMonday(date))} – ${calendarShortDay(calendarAddDays(calendarStartMonday(date),6))}`:calendarDayTitle(date);
+  const content=view==='month'?calendarMonthHTML(date,appointments):view==='week'?calendarWeekHTML(date,appointments):calendarDayHTML(date,appointments);
+  return{
+    title:'Calendar',
+    subtitle:'Month, week and day appointment views',
+    html:`${backBar('booking','Booking')}
+      ${hero('Booking Calendar','Switch between month, week and day. Tap a date, time slot or appointment to continue.','<button class="button primary" data-route="booking-new">New Booking</button>')}
+      <div class="panel calendar-panel">${calendarControls(view,date,title)}${content}</div>`,
+    mount(){
+      document.querySelectorAll('[data-calendar-view]').forEach(b=>b.onclick=()=>router.go(calendarRoute(b.dataset.calendarView,date)));
+      document.querySelector('[data-calendar-today]').onclick=()=>router.go(calendarRoute(view,calendarTodayISO()));
+      document.querySelectorAll('[data-calendar-move]').forEach(b=>b.onclick=()=>{
+        const direction=Number(b.dataset.calendarMove);
+        const next=view==='month'?calendarAddMonths(date,direction):view==='week'?calendarAddDays(date,direction*7):calendarAddDays(date,direction);
+        router.go(calendarRoute(view,next));
+      });
+      document.querySelectorAll('[data-calendar-date]').forEach(b=>b.onclick=e=>{
+        if(e.target.closest('[data-calendar-appointment]'))return;
+        router.go(calendarRoute('day',b.dataset.calendarDate));
+      });
+      document.querySelectorAll('[data-calendar-new]').forEach(b=>b.onclick=e=>{
+        if(e.target.closest('[data-calendar-appointment]'))return;
+        const [newDate,newTime]=b.dataset.calendarNew.split('|');
+        router.go(`booking-new?date=${encodeURIComponent(newDate)}&time=${encodeURIComponent(newTime)}`);
+      });
+      document.querySelectorAll('[data-calendar-appointment]').forEach(b=>b.onclick=e=>{
+        e.stopPropagation();calendarOpenAppointment(b.dataset.calendarAppointment);
+      });
+    }
+  };
+}
+
 async function bookingPage(){
   const d=readStore();
   return {title:'Booking',subtitle:'Booking hub',html:`
     ${backBar('today','Dashboard')}
     ${hero('Booking','Choose one booking function.')}
     <div class="panel"><div class="menu-list">
+      ${menuCard('🗓️','Calendar','Month, week and day appointment views','booking-calendar')}
       ${menuCard('➕','New Booking','Create and save a new appointment','booking-new')}
       ${menuCard('⏳','Pending Requests',`${d.appointments.filter(x=>x.status==='Pending').length} pending request(s)`,'booking-pending')}
       ${menuCard('✅','Confirmed Appointments',`${d.appointments.filter(x=>x.status==='Confirmed').length} confirmed appointment(s)`,'booking-confirmed')}
@@ -510,7 +739,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Local AI Beta 001 · Insight, Balance, Health.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Booking Calendar Build 002 · Local AI Beta 001.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -682,7 +911,7 @@ function createAppShell() {
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Local AI Beta 001</div>
+        <div class="build-label">Booking Calendar Build 002</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -726,6 +955,7 @@ const routes = {
   'patient-documents': patientDocumentsPage,
   'document-placeholder': documentPlaceholderPage,
   booking: bookingPage,
+  'booking-calendar': bookingCalendarPage,
   'booking-new': bookingFormPage,
   'booking-pending': bookingPendingPage,
   'booking-confirmed': bookingConfirmedPage,
@@ -780,7 +1010,8 @@ function fallbackParentRoute(route,params){
     'patient-documents':patientDetail,
     'document-placeholder':patientDetail,
     booking:'today',
-    'booking-new':'booking',
+    'booking-calendar':'booking',
+    'booking-new':'booking-calendar',
     'booking-pending':'booking',
     'booking-confirmed':'booking',
     'booking-history':'booking',
