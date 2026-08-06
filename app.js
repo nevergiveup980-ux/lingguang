@@ -348,6 +348,7 @@ async function patientAiPage(){
       ${menuCard('🧠','Clinical Summaries',`${count} summary record(s)`,'clinical-summary')}
       ${menuCard('📈','Health Analysis','Review remote-care trends','health-analysis')}
       ${menuCard('⚠️','Risk Review','Review screening flags','risk-review')}
+      ${menuCard('🧠','Local AI Engine','Download and test the browser-based local model','settings-local-ai')}
     </div></div>`};
 }
 
@@ -442,14 +443,58 @@ async function aiIntakeHubPage(){
     </div></div>`};
 }
 async function aiConversationPage(){
+  const aiState=window.LINGGUANG_LOCAL_AI?.getState?.()||{status:'idle',supported:!!navigator.gpu};
   return {title:'AI Conversation',subtitle:'Conversation intake',html:`
     ${backBar('ai-intake','AI Intake')}
-    ${hero('AI Conversation','The conversation workflow is active and saves the patient’s free-text concern locally.')}
-    <div class="panel"><form id="ai-conversation-form">
-      <label>Patient Name *<input name="patientName" required placeholder="Full name"></label>
-      <label>Tell LINGGUANG what is happening<textarea name="message" required placeholder="For example: My right shoulder has hurt for two months..."></textarea></label>
-      <div class="button-row"><button class="button primary">Create Structured Draft</button></div>
-    </form></div>`,mount(){document.querySelector('#ai-conversation-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));const parts=v.patientName.trim().split(/\s+/);writeDraft({firstName:parts.shift()||'',lastName:parts.join(' '),phone:'To be completed',concerns:['Other'],notes:v.message,painScore:0,sleepScore:7,energyScore:6,stressScore:4});setStep(0);toast('Conversation converted into an intake draft');router.go('intake');};}};
+    ${hero('AI Conversation','LINGGUANG first tries the on-device language model. If it is not ready, the local rule engine creates the draft instead.')}
+    <div class="panel">
+      <div class="local-ai-inline-status">
+        <span class="status-dot ${aiState.status==='ready'?'ready':''}"></span>
+        <div><strong>${aiState.status==='ready'?'Local model ready':'Rule fallback active'}</strong><small>${escapeHtml(aiState.message||'Open Settings → Local AI to download the model.')}</small></div>
+        <button type="button" class="button secondary" data-route="settings-local-ai">Local AI Settings</button>
+      </div>
+      <form id="ai-conversation-form">
+        <label>Patient Name *<input name="patientName" required placeholder="Full name"></label>
+        <label>Tell LINGGUANG what is happening<textarea name="message" required placeholder="For example: My right shoulder has hurt for two months..."></textarea></label>
+        <div class="button-row"><button class="button primary" id="conversation-submit">Create Structured Draft</button></div>
+      </form>
+      <div id="conversation-working" class="notice" hidden>LINGGUANG is processing the description locally…</div>
+    </div>`,mount(){
+      document.querySelector('#ai-conversation-form').onsubmit=async e=>{
+        e.preventDefault();
+        const submit=document.querySelector('#conversation-submit');
+        const working=document.querySelector('#conversation-working');
+        const v=Object.fromEntries(new FormData(e.currentTarget));
+        submit.disabled=true;working.hidden=false;
+        try{
+          const analysis=await window.LINGGUANG_LOCAL_AI.analyze(v.message);
+          const parts=v.patientName.trim().split(/\s+/);
+          const painMatch=String(v.message).match(/\b(10|[0-9])\s*(?:\/\s*10|out of 10)?\b/i);
+          writeDraft({
+            firstName:parts.shift()||'',
+            lastName:parts.join(' '),
+            phone:'To be completed',
+            concerns:[analysis.category||'Other'],
+            notes:v.message,
+            location:analysis.location||'',
+            duration:analysis.duration||'Select',
+            painScore:painMatch?Number(painMatch[1]):0,
+            sleepScore:7,
+            energyScore:6,
+            stressScore:4,
+            localAISummary:analysis.summary||'',
+            localAIMode:analysis.mode||'rule'
+          });
+          setStep(0);
+          toast(`Draft created with ${analysis.mode==='model'?'Local AI model':'local rule engine'}`);
+          router.go('intake');
+        }catch(error){
+          toast(error?.message||'Could not create a draft');
+        }finally{
+          submit.disabled=false;working.hidden=true;
+        }
+      };
+    }};
 }
 
 async function settingsPage(){
@@ -458,14 +503,163 @@ async function settingsPage(){
     ${hero('Settings','Mobile Navigation Edition preferences and information.')}
     <div class="panel"><div class="menu-list">
       ${menuCard('🌐','Language','English / 中文 workflow preparation','settings-language')}
+      ${menuCard('🧠','Local AI','Download, test and manage the on-device model','settings-local-ai')}
       ${menuCard('🔒','Privacy & Security','Local build privacy information','settings-privacy')}
       ${menuCard('ℹ️','About','Version and build information','settings-about')}
     </div></div>`};
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Brand Edition Build 001.2 · Insight, Balance, Health.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Local AI Beta 001 · Insight, Balance, Health.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
+}
+
+
+
+/* ===== Local AI Beta 001 ===== */
+function localAIStatusLabel(status){
+  const map={
+    unavailable:'Not supported',
+    idle:'Ready to download',
+    loading:'Downloading / loading',
+    ready:'Local model ready',
+    error:'Model unavailable'
+  };
+  return map[status]||status;
+}
+
+async function localAIPage(){
+  const ai=window.LINGGUANG_LOCAL_AI;
+  const snapshot=ai?.getState?.()||{
+    supported:!!navigator.gpu,
+    status:'idle',
+    progress:0,
+    message:'Local AI module is preparing.',
+    modelId:'SmolLM2-360M-Instruct-q4f32_1-MLC'
+  };
+  const supported=snapshot.supported;
+  return {
+    title:'Local AI',
+    subtitle:'On-device language model',
+    html:`
+      ${backBar('settings','Settings')}
+      ${hero('LINGGUANG Local AI','Download and run a small language model inside this browser. Patient text stays on the device during local inference.')}
+      <div class="stats-grid local-ai-stats">
+        <div class="stat-card"><span>WebGPU</span><strong>${supported?'Yes':'No'}</strong><small>${supported?'Hardware acceleration detected':'Rule mode will remain available'}</small></div>
+        <div class="stat-card"><span>Model Status</span><strong id="local-ai-status">${escapeHtml(localAIStatusLabel(snapshot.status))}</strong><small id="local-ai-message">${escapeHtml(snapshot.message||'')}</small></div>
+        <div class="stat-card"><span>Model</span><strong class="model-name">SmolLM2</strong><small>360M instruct · local browser model</small></div>
+        <div class="stat-card"><span>Cloud API Cost</span><strong>$0</strong><small>For local model inference</small></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Local Model Control</h3><span>Beta</span></div>
+        <p class="muted">The first installation downloads model files and stores them in browser cache. Loading time and storage depend on the device and connection.</p>
+        <div class="progress-shell" aria-label="Model loading progress">
+          <div class="progress-fill" id="local-ai-progress" style="width:${Math.round((snapshot.progress||0)*100)}%"></div>
+        </div>
+        <div class="progress-copy" id="local-ai-progress-copy">${Math.round((snapshot.progress||0)*100)}%</div>
+        <div class="button-row">
+          <button type="button" class="button primary" id="local-ai-load" ${!supported||snapshot.status==='loading'?'disabled':''}>
+            ${snapshot.status==='ready'?'Reload Local Model':'Download / Load Local Model'}
+          </button>
+          <button type="button" class="button secondary" id="local-ai-unload">Unload from Memory</button>
+          <button type="button" class="button danger" id="local-ai-clear">Delete Local Model Cache</button>
+        </div>
+        <div class="notice">Local AI is an information-structuring assistant. It does not diagnose disease or replace practitioner review.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Test Local Text Understanding</h3><span id="local-ai-mode">${snapshot.status==='ready'?'Local model':'Rule fallback'}</span></div>
+        <label>Patient description
+          <textarea id="local-ai-test-text" rows="5" placeholder="Example: My right shoulder has hurt for two months. It is worse at night and lifting my arm is difficult."></textarea>
+        </label>
+        <div class="button-row"><button type="button" class="button primary" id="local-ai-analyze">Analyze Locally</button></div>
+        <div id="local-ai-result" class="summary-box" hidden></div>
+      </div>`,
+    mount(){
+      const ai=window.LINGGUANG_LOCAL_AI;
+      const statusEl=document.querySelector('#local-ai-status');
+      const messageEl=document.querySelector('#local-ai-message');
+      const bar=document.querySelector('#local-ai-progress');
+      const percent=document.querySelector('#local-ai-progress-copy');
+      const mode=document.querySelector('#local-ai-mode');
+      const loadBtn=document.querySelector('#local-ai-load');
+
+      const updateUI=state=>{
+        if(!state)return;
+        statusEl.textContent=localAIStatusLabel(state.status);
+        messageEl.textContent=state.message||'';
+        const value=Math.max(0,Math.min(100,Math.round((state.progress||0)*100)));
+        bar.style.width=`${value}%`;
+        percent.textContent=`${value}%`;
+        mode.textContent=state.status==='ready'?'Local model':'Rule fallback';
+        loadBtn.disabled=!state.supported||state.status==='loading';
+        loadBtn.textContent=state.status==='ready'?'Reload Local Model':'Download / Load Local Model';
+      };
+
+      const unsubscribe=ai?.subscribe?.(updateUI);
+      document.querySelector('#local-ai-load').onclick=async()=>{
+        if(!ai)return toast('Local AI module is not available');
+        try{
+          await ai.load();
+          toast('Local AI model is ready');
+        }catch(error){
+          toast(error?.message||'Local model could not be loaded');
+        }
+      };
+      document.querySelector('#local-ai-unload').onclick=async()=>{
+        await ai?.unload?.();
+        toast('Local model unloaded from memory');
+      };
+      document.querySelector('#local-ai-clear').onclick=async()=>{
+        if(!confirm('Delete the locally cached AI model from this browser?'))return;
+        await ai?.clearCache?.();
+        toast('Local AI cache cleared');
+      };
+      document.querySelector('#local-ai-analyze').onclick=async()=>{
+        const text=document.querySelector('#local-ai-test-text').value.trim();
+        const resultEl=document.querySelector('#local-ai-result');
+        if(!text)return toast('Enter a patient description first');
+        resultEl.hidden=false;
+        resultEl.innerHTML='<p>Analyzing…</p>';
+        try{
+          const result=await ai.analyze(text);
+          resultEl.innerHTML=`
+            <h4>Structured Result</h4>
+            <p><b>Mode:</b> ${escapeHtml(result.mode||'rule')}</p>
+            <p><b>Category:</b> ${escapeHtml(result.category||'Other')}</p>
+            <p><b>Location:</b> ${escapeHtml(result.location||'Not identified')}</p>
+            <p><b>Duration:</b> ${escapeHtml(result.duration||'Not identified')}</p>
+            <p><b>Pattern:</b> ${escapeHtml((result.patterns||[]).join(', ')||'Not identified')}</p>
+            <p><b>Missing questions:</b> ${escapeHtml((result.missingQuestions||[]).join('; ')||'None identified')}</p>
+            <p><b>Summary:</b> ${escapeHtml(result.summary||text)}</p>`;
+        }catch(error){
+          resultEl.innerHTML=`<p>Analysis failed: ${escapeHtml(error?.message||String(error))}</p>`;
+        }
+      };
+
+      const cleanup=()=>{unsubscribe?.();window.removeEventListener('hashchange',cleanup)};
+      window.addEventListener('hashchange',cleanup,{once:true});
+    }
+  };
+}
+
+async function localAIPrivacyPage(){
+  return {
+    title:'Local AI Privacy',
+    subtitle:'How local inference works',
+    html:`
+      ${backBar('settings-local-ai','Local AI')}
+      ${hero('Local Processing','When the local model is active, the entered text is processed by the model running in this browser.')}
+      <div class="panel">
+        <h3>What remains local</h3>
+        <p>Text submitted to the Local AI test or Local AI conversation is processed by the downloaded browser model and is not sent to a GPT API by this feature.</p>
+        <h3>What still uses the internet</h3>
+        <p>The model and WebLLM software must be downloaded from their hosting services. GitHub Pages also serves the LINGGUANG application files.</p>
+        <h3>Current limitation</h3>
+        <p>This beta is not a production medical-record environment. Do not use identifiable patient information for real clinical care until authentication, secure cloud storage, consent, audit logging, and applicable compliance controls are implemented.</p>
+      </div>`
+  };
 }
 
 
@@ -488,7 +682,7 @@ function createAppShell() {
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Brand Build 001.2</div>
+        <div class="build-label">Local AI Beta 001</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -552,6 +746,8 @@ const routes = {
   'health-journey': healthJourneyPage,
   clinic: clinicPage,
   settings: settingsPage,
+  'settings-local-ai': localAIPage,
+  'settings-local-ai-privacy': localAIPrivacyPage,
   'settings-language': settingsInfoPage,
   'settings-privacy': settingsInfoPage,
   'settings-about': settingsInfoPage
@@ -604,6 +800,8 @@ function fallbackParentRoute(route,params){
     'health-journey':'today',
     clinic:'today',
     settings:'today',
+    'settings-local-ai':'settings',
+    'settings-local-ai-privacy':'settings-local-ai',
     'settings-language':'settings',
     'settings-privacy':'settings',
     'settings-about':'settings'
