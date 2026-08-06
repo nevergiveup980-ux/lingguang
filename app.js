@@ -198,7 +198,7 @@ async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'
 
 
 
-/* ===== Brand Build 006 ===== */
+/* ===== Home Logo Build 007 ===== */
 const PLATFORM_ROLE_KEY='lingguang-platform-role-v4';
 const PLATFORM_USER_KEY='lingguang-platform-user-v4';
 
@@ -223,7 +223,7 @@ async function platformEntryPage(){
   return {title:'LINGGUANG',subtitle:'Choose your portal',html:`
     <section class="platform-entry-page">
       <div class="platform-entry-brand">
-        <img src="lingguang-logo-full.png?v=2.3.0-brand006" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
+        <img src="lingguang-logo-full.png?v=2.4.0-home007" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
         <strong>LINGGUANG</strong><span>Health OS</span>
         <p>AI-powered integrative healthcare platform</p>
       </div>
@@ -249,7 +249,7 @@ async function roleLoginPage(){
   return {title,subtitle:'Secure portal entry',html:`
     ${backBar('platform-entry','Portal Selection')}
     <section class="role-login-wrap"><div class="role-login-card">
-      <img src="lingguang-logo-full.png?v=2.3.0-brand006" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
+      <img src="lingguang-logo-full.png?v=2.4.0-home007" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
       <span class="role-login-type">${title}</span><h2>Welcome</h2>
       <form id="role-login-form">
         ${role==='patient'?`
@@ -983,7 +983,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Brand Build 006 · Booking Calendar Build 002 · Local AI Beta 001.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Home Logo Build 007 · Booking Calendar Build 002 · Local AI Beta 001.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -1142,7 +1142,7 @@ function shell(){
     <div class="app-shell">
       <aside class="sidebar">
         <button type="button" class="brand brand-button" id="brand-home-button" aria-label="About LINGGUANG Health OS">
-          <img class="brand-logo-image" src="lingguang-logo.png?v=2.3.0-brand006" alt="LINGGUANG official logo">
+          <img class="brand-logo-image" src="lingguang-logo.png?v=2.4.0-home007" alt="LINGGUANG official logo">
           <span><strong>LINGGUANG HEALTH</strong><small>Health OS</small></span>
         </button>
         <nav class="main-nav">
@@ -1155,7 +1155,7 @@ function shell(){
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Brand Build 006</div>
+        <div class="build-label">Home Logo Build 007</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -1179,7 +1179,7 @@ function shell(){
     <div class="brand-splash" id="brand-splash" aria-hidden="true">
       <div class="brand-splash-atmosphere"></div>
       <div class="brand-splash-card">
-        <img src="lingguang-logo-full.png?v=2.3.0-brand006" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
+        <img src="lingguang-logo-full.png?v=2.4.0-home007" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
         <strong>LINGGUANG HEALTH</strong>
         <span>Health OS</span>
         <small>科技赋能 · 用心守护健康</small>
@@ -1190,7 +1190,7 @@ function shell(){
     <div class="login-screen" id="login-screen" hidden>
       <div class="login-panel">
         <div class="login-brand">
-          <img src="lingguang-logo-full.png?v=2.3.0-brand006" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
+          <img src="lingguang-logo-full.png?v=2.4.0-home007" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
           <strong>LINGGUANG</strong>
           <span>Health OS</span>
         </div>
