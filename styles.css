@@ -510,3 +510,9 @@
   .voice-chat-bubble{max-width:88%}
   .voice-summary-card>div{grid-template-columns:1fr}
 }
+
+
+/* Voice AI Build 010.1 route fix */
+.voice-conversation-entry{position:relative;z-index:2;cursor:pointer!important;touch-action:manipulation}
+.route-error-card{max-width:650px;margin:30px auto;border:1px solid #e7b1a7;background:#fff6f3}
+.route-error-card h3{color:#8d342a}

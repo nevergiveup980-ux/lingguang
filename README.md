@@ -1,28 +1,19 @@
-# LINGGUANG Health OS — Voice AI Build 010
+# LINGGUANG Health OS — Voice AI Build 010.1 Route Fix
 
-## What now works
-- Real turn-by-turn conversation flow.
-- Microphone speech input when the browser supports Web Speech.
-- Typed-input fallback.
-- Spoken AI follow-up questions through device speech synthesis.
-- English, Mandarin, Cantonese and French voice-language selectors.
-- Conversation context retained across the intake.
-- Structured extraction:
-  - main concern
-  - duration
-  - location/side
-  - severity
-  - better/worse factors
-  - sleep/activity impact
-  - prior treatment/testing
-  - visit goal
-- Live summary panel.
-- Patient role can create an Application draft.
-- Professional role can create a reviewed Clinical draft.
-- Header microphone opens the working conversation directly.
+## Fixed
+- Voice Conversation card now uses a direct iPhone-safe click handler.
+- Added a prominent Start Voice Conversation button at the top of Voice AI.
+- Header microphone now opens the conversation directly.
+- Added safe ID generation for older iOS/PWA environments.
+- Added visible route-error reporting instead of silent failure.
+- Delegated routing now includes an explicit Voice Conversation fallback.
 
-## Current limitation
-The conversation engine in this package is local and rule-guided, so it works without an API key. A professional cloud speech provider and cloud language model are not yet connected. Do not use this development build as a production medical record system.
+## Test
+1. Open Voice AI.
+2. Tap Start Voice Conversation or the Voice Conversation card.
+3. The conversation page should open immediately.
+4. Type a response first to verify the conversation flow.
+5. Then test the microphone.
 
 ## Mobile GitHub upload
 Replace:
