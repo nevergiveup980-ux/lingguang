@@ -541,3 +541,16 @@
   border:1px solid #b9d8cc;background:#fff;color:#0b614c;
   border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer
 }
+
+
+/* Voice AI Build 010.3 — Direct login restore */
+.role-login-fields{display:grid;gap:14px}
+.role-login-submit{
+  width:100%!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.role-login-submit:active{transform:scale(.985)}

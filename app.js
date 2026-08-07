@@ -198,7 +198,7 @@ async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'
 
 
 
-/* ===== Voice AI Build 010.2 Login Fix ===== */
+/* ===== Voice AI Build 010.3 Login Restore ===== */
 const PLATFORM_ROLE_KEY='lingguang-platform-role-v4';
 const PLATFORM_USER_KEY='lingguang-platform-user-v4';
 
@@ -272,38 +272,93 @@ async function platformEntryPage(){
     mount(){bindPlatformRoleChoices()}};
 }
 
+
+function completeRoleLogin(role){
+  try{
+    const safe=['professional','patient','admin'].includes(role)?role:'professional';
+    const form=document.querySelector('#role-login-form');
+    if(!form)throw new Error('Login form is unavailable');
+
+    if(safe==='patient'){
+      const patientId=form.querySelector('[name="patientId"]')?.value||'';
+      const d=readStore();
+      const patient=d.patients.find(x=>x.id===patientId);
+      if(!patient){toast('Select a patient profile');return}
+      setPlatformSession('patient',{patientId:patient.id,name:patient.name});
+      location.hash='#/patient-portal';
+    }else{
+      const username=form.querySelector('[name="username"]')?.value?.trim()||
+        (safe==='admin'?'Clinic Admin':'Dr. Ling');
+      setPlatformSession(safe,{name:username});
+      location.hash=safe==='admin'?'#/admin-portal':'#/today';
+    }
+
+    setTimeout(()=>render().catch(showRouteError),0);
+  }catch(error){
+    showRouteError(error);
+  }
+}
+window.LINGGUANG_COMPLETE_LOGIN=completeRoleLogin;
+
 async function roleLoginPage(){
   const role=routeParams.get('role')||'professional',d=readStore();
-  const title=role==='patient'?'Patient Portal':role==='admin'?'Clinic Administration':'Healthcare Professional';
+  const safe=['professional','patient','admin'].includes(role)?role:'professional';
+  const title=safe==='patient'?'Patient Portal':safe==='admin'?'Clinic Administration':'Healthcare Professional';
+
   return {title,subtitle:'Secure portal entry',html:`
     ${backBar('platform-entry','Portal Selection')}
     <section class="role-login-wrap"><div class="role-login-card">
       <img src="lingguang-logo-full.png?v=2.5.0-icon008" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
       <span class="role-login-type">${title}</span><h2>Welcome</h2>
-      <form id="role-login-form">
-        ${role==='patient'?`
-          <label>Patient Profile<select name="patientId" required><option value="">Select patient</option>${d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></label>
-          <label>Phone or access code<input name="credential" required value="demo"></label>
+
+      <div id="role-login-form" class="role-login-fields" autocomplete="off">
+        ${safe==='patient'?`
+          <label>Patient Profile
+            <select name="patientId">
+              <option value="">Select patient</option>
+              ${d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}
+            </select>
+          </label>
+          <label>Phone or access code
+            <input name="credential" type="text" inputmode="text" autocomplete="off" value="demo">
+          </label>
         `:`
-          <label>Email or username<input name="username" required value="${role==='admin'?'Clinic Admin':'Dr. Ling'}"></label>
-          <label>Password<input name="password" type="password" required value="lingguang"></label>
+          <label>Email or username
+            <input name="username" type="text" inputmode="text" autocomplete="off"
+              value="${safe==='admin'?'Clinic Admin':'Dr. Ling'}">
+          </label>
+          <label>Password
+            <input name="password" type="text" inputmode="text" autocomplete="off"
+              value="lingguang">
+          </label>
         `}
+
         <label class="remember"><input type="checkbox" checked> Remember this session</label>
-        <button type="submit" class="button primary role-login-submit">Enter ${title}</button>
-      </form>
-      ${role==='patient'&&!d.patients.length?'<div class="notice">No patient profile exists yet. Enter the Professional Portal first and create one.</div>':''}
+
+        <button type="button"
+          class="button primary role-login-submit"
+          id="direct-role-login"
+          onclick="LINGGUANG_COMPLETE_LOGIN('${safe}')">
+          Enter ${title}
+        </button>
+      </div>
+
+      ${safe==='patient'&&!d.patients.length?'<div class="notice">No patient profile exists yet. Enter the Professional Portal first and create one.</div>':''}
     </div></section>`,
     mount(){
-      const form=document.querySelector('#role-login-form');
-      if(!form){showRouteError(new Error('Login form was not mounted'));return}
-      form.onsubmit=e=>{
-      e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));
-      if(role==='patient'){
-        const p=d.patients.find(x=>x.id===v.patientId);if(!p)return toast('Select a patient');
-        setPlatformSession('patient',{patientId:p.id,name:p.name});
-      }else setPlatformSession(role,{name:v.username||title});
-      router.go(roleHome(role));
-    };
+      const button=document.querySelector('#direct-role-login');
+      if(!button){showRouteError(new Error('Direct login button was not mounted'));return}
+      button.disabled=false;
+      button.style.pointerEvents='auto';
+      button.onclick=event=>{
+        event.preventDefault();
+        event.stopPropagation();
+        completeRoleLogin(safe);
+      };
+      button.addEventListener('touchend',event=>{
+        event.preventDefault();
+        completeRoleLogin(safe);
+      },{passive:false});
     }};
 }
 
@@ -432,7 +487,7 @@ async function adminPlaceholderPage(){
 
 
 
-/* ===== Voice AI Build 010.2 Login Fix ===== */
+/* ===== Voice AI Build 010.3 Login Restore ===== */
 const SpeechRecognitionAPI=window.SpeechRecognition||window.webkitSpeechRecognition;
 function voiceNewSession(patient){return{id:crypto.randomUUID(),code:`VS-${Date.now()}`,patientId:patient?.id||'',patientName:patient?.name||'',doctor:platformUser().name||'Dr. Ling',startedAt:new Date().toISOString(),endedAt:'',status:'Draft',language:'en-CA',transcript:'',soap:{subjective:'',objective:'',assessment:'',plan:''},confidence:0,confirmed:false}}
 function voiceSaveSession(s){updateStore(d=>{d.voiceSessions=d.voiceSessions||[];const i=d.voiceSessions.findIndex(x=>x.id===s.id);i>=0?d.voiceSessions[i]=s:d.voiceSessions.push(s)})}
@@ -1359,7 +1414,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 010.2 Login Fix · Booking Calendar Build 002 · Local AI Beta 001.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 010.3 Login Restore · Booking Calendar Build 002 · Local AI Beta 001.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -1532,7 +1587,7 @@ function shell(){
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Voice AI Build 010.2 Login Fix</div>
+        <div class="build-label">Voice AI Build 010.3 Login Restore</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -1674,6 +1729,17 @@ function bindBrandHome(){
 
 const router={go(route){location.hash=`#/${route}`},start(){
   
+  
+  document.addEventListener('click',event=>{
+    const loginButton=event.target.closest('#direct-role-login');
+    if(loginButton){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const role=routeParams.get('role')||'professional';
+      completeRoleLogin(role);
+    }
+  },true);
+
   document.addEventListener('click',event=>{
     const roleCard=event.target.closest('[data-role-choice]');
     if(roleCard){

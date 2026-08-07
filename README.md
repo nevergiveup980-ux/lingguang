@@ -1,24 +1,24 @@
-# LINGGUANG Health OS — Voice AI Build 010.2 Login Fix
+# LINGGUANG Health OS — Voice AI Build 010.3 Login Restore
 
-## Fixed
-- Restored all three Portal entry buttons:
-  - Healthcare Professional
-  - Patient Portal
-  - Clinic Administration
-- Role cards now use direct iPhone-safe handlers.
-- Added touch-event fallback for PWA use.
-- Added document-level emergency routing fallback.
-- Added three small direct login links below the cards.
-- Hardened login form mounting and submit handling.
-- Preserved Voice Conversation Build 010.1 fixes.
+## Critical fix
+The iPhone recording showed the login button invoking the password/autofill form flow and reloading the page instead of creating a LINGGUANG session.
 
-## Test order
-1. Open Portal Selection.
-2. Tap Healthcare Professional.
-3. Return and test Patient Portal.
-4. Return and test Clinic Administration.
-5. Enter Professional Portal and test Voice AI.
-6. Tap Start Voice Conversation.
+This build:
+- removes dependency on HTML form submission
+- uses a direct login button
+- sets the Professional / Patient / Admin session explicitly
+- navigates directly to the correct portal
+- disables browser password autofill interference in this development build
+- adds click, touch and document-level fallbacks
+- preserves the Voice Conversation route fixes
+
+## Test
+1. Open Professional Login.
+2. Leave the provided development credentials unchanged.
+3. Tap Enter Healthcare Professional.
+4. Confirm the Dashboard opens without a splash reload.
+5. Repeat for Admin.
+6. Patient Portal requires an existing patient profile.
 
 ## Upload
-Replace all files from this package in the GitHub repository root.
+Replace all files in the GitHub repository root.
