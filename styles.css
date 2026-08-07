@@ -522,3 +522,75 @@
   max-width:680px;margin:24px auto;border:1px solid #e8b3a9;background:#fff7f4
 }
 .voice-error-card h3{color:#8c342b}
+
+
+/* Build 010.6 — Patient Application medical history expansion */
+.application-medical-section{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin-top:18px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:#fbfdfc
+}
+.application-medical-head{grid-column:1/-1}
+.application-medical-head span{
+  font-size:11px;font-weight:900;letter-spacing:.12em;color:#0b6a52;text-transform:uppercase
+}
+.application-medical-head h3{margin:6px 0 4px}
+.application-medical-head p{margin:0;color:var(--muted)}
+.application-medical-checklist{
+  grid-column:1/-1;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px 14px;
+  background:#fff
+}
+.application-medical-checklist legend{font-weight:800;padding:0 6px}
+.medical-check-row{
+  display:flex!important;
+  align-items:center;
+  gap:9px;
+  padding:8px 9px;
+  border-radius:10px;
+  background:#f7faf8
+}
+.medical-check-row input{width:auto!important;margin:0}
+.medical-check-row span{font-size:13px}
+.application-medical-summary{
+  margin:12px 0;border:1px solid var(--line);border-radius:12px;padding:10px;background:#f8fbf9
+}
+.application-medical-summary summary{font-weight:800;color:#0b604b;cursor:pointer}
+.application-medical-summary pre{
+  white-space:pre-wrap;word-break:break-word;font:inherit;line-height:1.5;color:var(--text)
+}
+@media(max-width:650px){
+  .application-medical-section{grid-template-columns:1fr;padding:15px}
+  .application-medical-checklist{grid-template-columns:1fr}
+}
+
+
+/* Build 011 — Hands-Free Voice */
+.voice-chat-mic.processing{background:#b58b25}
+.voice-input-diagnostics{
+  margin-top:10px;padding:10px 12px;border:1px solid var(--line);
+  border-radius:13px;background:#f8fbf9
+}
+.voice-input-meter{
+  height:7px;border-radius:999px;background:#dce8e2;overflow:hidden;margin-bottom:7px
+}
+.voice-input-meter span{
+  display:block;width:2%;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#42b989,#d6b14d);
+  transition:width .08s linear
+}
+.voice-input-diagnostics small{color:var(--muted);font-weight:700}
+.voice-input-diagnostics[data-state="listening"]{border-color:#77c8aa;background:#f1fbf6}
+.voice-input-diagnostics[data-state="error"]{border-color:#e2aaa2;background:#fff6f4}
+.voice-recording-preview{width:100%;margin-top:10px}

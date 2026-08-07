@@ -1,33 +1,34 @@
-# LINGGUANG Health OS — Voice AI Build 010.5 Stable Fix
+# LINGGUANG Health OS — Build 011 Hands-Free Voice
 
-## Root cause
-The original Build 010 Voice Conversation code called two missing definitions:
+## Voice AI improvements
+- Explicit microphone permission request using getUserMedia.
+- Live microphone level meter: confirms that the iPhone is actually receiving sound.
+- Improved state machine:
+  - LINGGUANG speaking
+  - Your turn
+  - Listening
+  - Processing
+  - Ready
+- Optional Auto-listen after reply.
+- Prevents microphone capture while LINGGUANG is speaking.
+- Waits briefly after AI speech before reopening the microphone.
+- Web Speech recognition remains the first transcription path.
+- MediaRecorder fallback verifies/captures real microphone audio when browser speech recognition fails.
+- Captured fallback audio can be played back directly in the Voice Conversation page.
+- Clear permission / microphone / recognition error messages.
+- Stop Voice control immediately cancels speech and microphone activity.
+- Existing Patient Intake expansion from Build 010.6 is preserved.
 
-- `VOICE_CONVO_KEY`
-- `voiceConversationInitial()`
+## Important limitation
+MediaRecorder fallback proves the microphone is working and captures audio, but converting that fallback recording into text still requires a cloud speech-to-text endpoint. Build 011 does not expose or hard-code an API key in GitHub.
 
-Opening Voice Conversation therefore caused an immediate JavaScript ReferenceError.
-The page remained unchanged, which looked like an unresponsive button.
-
-## This build
-- Rebuilt from the original Build 010, where all three login portals still worked.
-- Added the missing conversation storage key.
-- Added the missing conversation initialization function.
-- Added an iPhone-safe conversation ID fallback.
-- Added a local error card for Voice Conversation only.
-- Did not modify login logic.
-- Did not modify the global router.
-- Did not modify the three portal entry buttons.
-- Added a visible `Build 010.5 Stable` badge.
-
-## Test order
-1. Confirm the Voice AI page shows `Build 010.5 Stable`.
-2. Tap the Voice Conversation card.
-3. The conversation page should show the first LINGGUANG question.
-4. Type a reply and press Send.
-5. Confirm the next question appears.
-6. Then test the microphone.
-7. Sign out and verify Professional, Patient and Admin portal entries still work.
+## Recommended test
+1. Open Voice Conversation in Safari.
+2. Allow microphone access.
+3. Watch the audio meter while speaking.
+4. If browser recognition succeeds, text is submitted automatically.
+5. If recognition fails but recording works, the page will show an audio preview.
+6. Test Auto-listen after reply only after manual Speak works reliably.
 
 ## Upload
-Replace all files from this package in the GitHub repository root.
+Replace all files in the GitHub repository root.
