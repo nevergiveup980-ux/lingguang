@@ -594,3 +594,7 @@
 .voice-input-diagnostics[data-state="listening"]{border-color:#77c8aa;background:#f1fbf6}
 .voice-input-diagnostics[data-state="error"]{border-color:#e2aaa2;background:#fff6f4}
 .voice-recording-preview{width:100%;margin-top:10px}
+
+.voice-iphone-hint{
+  display:block;margin-top:5px;color:#71867e;font-size:11px;font-weight:600
+}

@@ -198,7 +198,7 @@ async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'
 
 
 
-/* ===== Voice AI Build 011 Hands-Free Voice ===== */
+/* ===== Voice AI Build 011.1 iPhone Voice Loop Fix ===== */
 const PLATFORM_ROLE_KEY='lingguang-platform-role-v4';
 const PLATFORM_USER_KEY='lingguang-platform-user-v4';
 
@@ -551,13 +551,13 @@ async function adminPlaceholderPage(){
 
 
 
-/* ===== Voice AI Build 011 Hands-Free Voice ===== */
+/* ===== Voice AI Build 011.1 iPhone Voice Loop Fix ===== */
 const SpeechRecognitionAPI=window.SpeechRecognition||window.webkitSpeechRecognition;
 function voiceNewSession(patient){return{id:crypto.randomUUID(),code:`VS-${Date.now()}`,patientId:patient?.id||'',patientName:patient?.name||'',doctor:platformUser().name||'Dr. Ling',startedAt:new Date().toISOString(),endedAt:'',status:'Draft',language:'en-CA',transcript:'',soap:{subjective:'',objective:'',assessment:'',plan:''},confidence:0,confirmed:false}}
 function voiceSaveSession(s){updateStore(d=>{d.voiceSessions=d.voiceSessions||[];const i=d.voiceSessions.findIndex(x=>x.id===s.id);i>=0?d.voiceSessions[i]=s:d.voiceSessions.push(s)})}
 function voiceSOAP(text){const t=String(text||'').trim(),l=t.toLowerCase(),missing=[];if(/pain|疼|痛/.test(l)&&!/\b(10|[0-9])\s*(?:\/\s*10|out of 10)?\b/.test(l))missing.push('Pain score (VAS) is missing.');if(/shoulder|肩/.test(l)&&!/rom|range of motion|活动度|活动范围/.test(l))missing.push('Consider documenting shoulder ROM.');return{subjective:t,objective:/rom|range of motion|检查|活动度/.test(l)?t:'',assessment:/improv|better|worse|改善|加重/.test(l)?t:'',plan:/acupuncture|针灸|cupping|拔罐|plan|计划|复诊/.test(l)?t:'',missing,confidence:t.length>20?88:72}}
 function voiceIntent(text){const t=String(text||'').toLowerCase();if(/预约|calendar|appointment/.test(t))return['booking-calendar?view=day&date='+calendarTodayISO(),'Today calendar'];if(/申请|application/.test(t))return['applications-waiting','Pending applications'];if(/新建患者|new patient/.test(t))return['patient-new','New patient'];if(/病历|clinical note/.test(t))return['clinical-new','Clinical note'];return null}
-async function voiceAIPage(){const d=readStore(),rows=(d.voiceSessions||[]).slice().reverse();return{title:'Voice AI',subtitle:'Consultation and reviewed voice drafts',html:`${backBar('today','Dashboard')}<div class="build-badge">Build 011 Hands-Free Voice</div>${hero('LINGGUANG Voice AI','Create a consultation session, dictate a draft and confirm it before saving.','<button class="button primary" data-route="voice-consultation">Start Consultation</button>')}<div class="voice-status-grid"><div class="voice-status-card"><span>Browser Speech</span><strong>${SpeechRecognitionAPI?'Available':'Typed Fallback'}</strong><small>Cloud speech is not connected yet.</small></div><div class="voice-status-card"><span>Safety</span><strong>Review Required</strong><small>No voice draft becomes a clinical note automatically.</small></div><div class="voice-status-card"><span>Sessions</span><strong>${rows.length}</strong><small>${rows.filter(x=>x.status!=='Saved').length} awaiting review</small></div></div><div class="panel"><div class="menu-list">${menuCard('💬','Voice Conversation','Talk with LINGGUANG and receive spoken follow-up questions','voice-conversation')}${menuCard('🩺','Consultation Workspace','Patient-linked voice session','voice-consultation')}${menuCard('🧭','Voice Command','Open common modules by voice','voice-command')}${menuCard('✅','Review Center','Review and save voice drafts','voice-review')}</div></div><div class="notice">Build 010 adds a working voice conversation loop with spoken questions, speech input, typed fallback, context memory and reviewed summaries. Cloud language-model connection remains optional.</div>`}}
+async function voiceAIPage(){const d=readStore(),rows=(d.voiceSessions||[]).slice().reverse();return{title:'Voice AI',subtitle:'Consultation and reviewed voice drafts',html:`${backBar('today','Dashboard')}<div class="build-badge">Build 011.1 iPhone Voice Loop Fix</div>${hero('LINGGUANG Voice AI','Create a consultation session, dictate a draft and confirm it before saving.','<button class="button primary" data-route="voice-consultation">Start Consultation</button>')}<div class="voice-status-grid"><div class="voice-status-card"><span>Browser Speech</span><strong>${SpeechRecognitionAPI?'Available':'Typed Fallback'}</strong><small>Cloud speech is not connected yet.</small></div><div class="voice-status-card"><span>Safety</span><strong>Review Required</strong><small>No voice draft becomes a clinical note automatically.</small></div><div class="voice-status-card"><span>Sessions</span><strong>${rows.length}</strong><small>${rows.filter(x=>x.status!=='Saved').length} awaiting review</small></div></div><div class="panel"><div class="menu-list">${menuCard('💬','Voice Conversation','Talk with LINGGUANG and receive spoken follow-up questions','voice-conversation')}${menuCard('🩺','Consultation Workspace','Patient-linked voice session','voice-consultation')}${menuCard('🧭','Voice Command','Open common modules by voice','voice-command')}${menuCard('✅','Review Center','Review and save voice drafts','voice-review')}</div></div><div class="notice">Build 010 adds a working voice conversation loop with spoken questions, speech input, typed fallback, context memory and reviewed summaries. Cloud language-model connection remains optional.</div>`}}
 async function voiceConsultationPage(){const d=readStore();return{title:'Consultation Workspace',subtitle:'Create a voice session',html:`${backBar('voice-ai','Voice AI')}${hero('Start Consultation','Select a patient and begin a reviewed session.')}<div class="panel"><form id="voice-start-form" class="form-grid"><label>Patient<select name="patientId" required><option value="">Select patient</option>${d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></label><label>Language<select name="language"><option value="en-CA">English</option><option value="zh-CN">中文</option><option value="yue-Hant-HK">粵語</option><option value="fr-CA">Français</option></select></label><label>Session Type<select name="sessionType"><option>Follow-up Consultation</option><option>Initial Consultation</option><option>Treatment Session</option></select></label><div class="form-action"><button class="button primary">Create Session</button></div></form></div>`,mount(){document.querySelector('#voice-start-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget)),p=d.patients.find(x=>x.id===v.patientId);if(!p)return toast('Select a patient');const s=voiceNewSession(p);s.language=v.language;s.sessionType=v.sessionType;voiceSaveSession(s);router.go(`voice-session?id=${s.id}`)}}}}
 async function voiceSessionPage(){const s=(readStore().voiceSessions||[]).find(x=>x.id===routeParams.get('id'));if(!s)return{title:'Voice Session',subtitle:'Not found',html:empty('Session not found')};return{title:'Voice Session',subtitle:s.patientName,html:`${backBar('voice-ai','Voice AI')}<section class="voice-session-banner"><div><span>${escapeHtml(s.code)}</span><h2>${escapeHtml(s.patientName)}</h2><p>${escapeHtml(s.sessionType||'Consultation')} · ${escapeHtml(s.doctor)}</p></div><div><b id="voice-state">Draft</b></div></section><div class="voice-workspace-grid"><section class="panel"><div class="panel-head"><h3>Live Transcript</h3><span>${SpeechRecognitionAPI?'Ready':'Typed fallback'}</span></div><label>Language<select id="voice-language"><option value="en-CA">English</option><option value="zh-CN">中文</option><option value="yue-Hant-HK">粵語</option><option value="fr-CA">Français</option></select></label><button type="button" class="voice-record-button" id="voice-record"><span>🎙</span><strong>Start Listening</strong><small>Tap to begin</small></button><textarea id="voice-transcript" rows="11" placeholder="Speak or type here">${escapeHtml(s.transcript||'')}</textarea><div class="button-row"><button class="button secondary" id="voice-command-test">Run as Command</button><button class="button primary" id="voice-soap">Generate SOAP Draft</button></div></section><section class="panel"><h3>Clinical Copilot</h3><div id="voice-copilot" class="voice-empty">Generate a draft to see documentation reminders.</div></section></div>`,mount(){let r=null,listening=false;const box=document.querySelector('#voice-transcript'),btn=document.querySelector('#voice-record'),lang=document.querySelector('#voice-language');lang.value=s.language||'en-CA';if(SpeechRecognitionAPI){r=new SpeechRecognitionAPI();r.continuous=true;r.interimResults=false;r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)box.value=(box.value+' '+e.results[i][0].transcript).trim();s.transcript=box.value;voiceSaveSession(s)};r.onend=()=>{if(listening)try{r.start()}catch{}}}btn.onclick=()=>{if(!r)return toast('Live browser speech unavailable. Type the transcript instead.');listening=!listening;r.lang=lang.value;try{listening?r.start():r.stop()}catch{}btn.classList.toggle('listening',listening);btn.querySelector('strong').textContent=listening?'Listening…':'Start Listening'};box.oninput=()=>{s.transcript=box.value;voiceSaveSession(s)};document.querySelector('#voice-command-test').onclick=()=>{const x=voiceIntent(box.value);if(x){toast(`Opening ${x[1]}`);router.go(x[0])}else toast('Clinical content detected. Generate a SOAP draft instead.')};document.querySelector('#voice-soap').onclick=()=>{s.transcript=box.value;if(!s.transcript.trim())return toast('Add transcript text first');s.soap=voiceSOAP(s.transcript);s.confidence=s.soap.confidence;s.status='Review';voiceSaveSession(s);router.go(`voice-review-session?id=${s.id}`)}}}}
 async function voiceReviewSessionPage(){const s=(readStore().voiceSessions||[]).find(x=>x.id===routeParams.get('id'));if(!s)return voiceReviewPage();const q=s.soap||voiceSOAP(s.transcript);return{title:'Voice Review',subtitle:s.patientName,html:`${backBar(`voice-session?id=${s.id}`,'Voice Session')}${hero('Review Before Saving','Edit every section. Nothing enters the clinical record until confirmed.')}<div class="panel"><form id="voice-review-form" class="form-grid"><label class="wide">Subjective<textarea name="subjective" rows="5">${escapeHtml(q.subjective||'')}</textarea></label><label class="wide">Objective<textarea name="objective" rows="4">${escapeHtml(q.objective||'')}</textarea></label><label class="wide">Assessment<textarea name="assessment" rows="4">${escapeHtml(q.assessment||'')}</textarea></label><label class="wide">Plan<textarea name="plan" rows="4">${escapeHtml(q.plan||'')}</textarea></label><div class="wide">${(q.missing||[]).map(x=>`<div class="voice-suggestion">⚠ ${escapeHtml(x)}</div>`).join('')}</div><div class="form-action"><button class="button primary">Confirm & Save Clinical Note</button></div></form></div>`,mount(){document.querySelector('#voice-review-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));s.soap=v;s.status='Saved';s.confirmed=true;s.endedAt=new Date().toISOString();voiceSaveSession(s);updateStore(d=>d.clinicalNotes.push({id:crypto.randomUUID(),patientId:s.patientId,date:calendarTodayISO(),type:'Voice SOAP Note',note:`S: ${v.subjective}\n\nO: ${v.objective}\n\nA: ${v.assessment}\n\nP: ${v.plan}`,sessionId:s.id,createdAt:new Date().toISOString()}));toast('Voice note saved to Clinical');router.go(`patient-clinical?patient=${s.patientId}`)}}}}
@@ -781,7 +781,7 @@ async function voiceConversationPage(){
           <div id="voice-chat-interim" class="voice-interim"></div>
           <div class="voice-input-diagnostics" id="voice-mic-hint" data-state="idle">
             <div class="voice-input-meter"><span id="voice-input-meter-bar"></span></div>
-            <small id="voice-input-meter-text">Waiting for voice…</small>
+            <small id="voice-input-meter-text">Waiting for voice…</small><small class="voice-iphone-hint">iPhone: wait until LINGGUANG finishes speaking, then answer.</small>
           </div>
           <audio id="voice-recording-preview" controls hidden class="voice-recording-preview"></audio>
         </section>
@@ -811,7 +811,7 @@ async function voiceConversationPage(){
 }
 
 
-/* ===== Build 011 Hands-Free Voice Engine ===== */
+/* ===== Build 011.1 iPhone Voice Loop Fix Engine ===== */
 const LINGGUANG_VOICE_DIAG_KEY='lingguang-voice-diagnostics-v1';
 
 function voiceDiagSave(patch){
@@ -1009,24 +1009,44 @@ function mountVoiceConversation(convo){
     }
   }
 
-  async function startListening(){
+  async function startListening(retryCount=0){
     if(listening)return;
+
+    clearTimeout(autoListenTimer);
+    const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 
     try{
       voiceSetMicState('permission');
-      micStream=await requestLingguangMicrophone();
-      stopMeter=createVoiceLevelMeter(micStream,voiceSetMeter);
-      voiceSetMicState('listening');
-      listening=true;
-      recognitionGotFinal=false;
 
-      const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-
+      // iPhone/Safari: never keep getUserMedia open while SpeechRecognition owns the mic.
       if(Recognition){
+        stopMeter();
+        stopMeter=()=>{};
+        stopMediaStream(micStream);
+        micStream=null;
+        voiceSetMeter(0);
+
+        recognitionGotFinal=false;
         recognition=new Recognition();
         recognition.continuous=false;
         recognition.interimResults=true;
+        recognition.maxAlternatives=1;
         recognition.lang=lang.value;
+
+        recognition.onstart=()=>{
+          listening=true;
+          voiceSetMicState('listening','Listening — speak now');
+          const meterText=document.querySelector('#voice-input-meter-text');
+          if(meterText)meterText.textContent='Safari speech recognition active';
+        };
+
+        recognition.onspeechstart=()=>{
+          voiceSetMicState('listening','Voice detected');
+        };
+
+        recognition.onspeechend=()=>{
+          voiceSetMicState('processing','Processing speech…');
+        };
 
         recognition.onresult=e=>{
           let finalText='',temp='';
@@ -1040,37 +1060,75 @@ function mountVoiceConversation(convo){
             recognitionGotFinal=true;
             input.value=voiceConversationNormalize(finalText);
             interim.textContent='';
-            voiceDiagSave({speechRecognition:'working',lastTranscript:input.value});
+            voiceDiagSave({
+              speechRecognition:'working',
+              lastTranscript:input.value,
+              lastRecognitionAt:new Date().toISOString()
+            });
           }
         };
 
         recognition.onerror=e=>{
-          voiceDiagSave({speechRecognition:`error:${e.error}`});
-          interim.textContent=`Speech recognition: ${e.error}`;
+          const error=e.error||'unknown';
+          voiceDiagSave({speechRecognition:`error:${error}`});
+
+          if(error==='aborted' && retryCount<1){
+            interim.textContent='Safari interrupted listening. Reconnecting…';
+            listening=false;
+            try{recognition.abort()}catch{}
+            recognition=null;
+            voiceSetMicState('idle','Reconnecting microphone…');
+            setTimeout(()=>startListening(retryCount+1),900);
+            return;
+          }
+
+          if(error==='no-speech'){
+            interim.textContent='No speech detected. Tap the microphone and try again.';
+          }else if(error==='not-allowed' || error==='service-not-allowed'){
+            interim.textContent='Microphone / speech permission is not allowed in Safari.';
+          }else{
+            interim.textContent=`Speech recognition: ${error}`;
+          }
         };
 
         recognition.onend=()=>{
+          if(recognition===null)return;
+
           const text=input.value.trim();
-          cleanupInput();
+          listening=false;
+          recognition=null;
+
           if(recognitionGotFinal && text){
+            voiceSetMicState('processing');
             handleUser(text);
             return;
           }
-          // Recognition failed even though mic access may work. Fall back to recording diagnostic.
-          if(!recognitionGotFinal){
-            voiceSetMicState('idle','No words recognized — tap mic to retry');
-          }
+
+          voiceSetMicState('idle','No words recognized — tap mic to retry');
         };
 
         try{
           recognition.start();
           return;
         }catch(error){
+          recognition=null;
+          listening=false;
           voiceDiagSave({speechRecognition:`start-failed:${error.message}`});
+          if(retryCount<1){
+            interim.textContent='Restarting Safari speech recognition…';
+            setTimeout(()=>startListening(retryCount+1),900);
+            return;
+          }
         }
       }
 
-      // Audio-recording fallback: verifies the phone microphone is actually captured.
+      // Fallback recorder only after recognition is unavailable or cannot start.
+      voiceSetMicState('permission','Opening microphone recorder…');
+      micStream=await requestLingguangMicrophone();
+      stopMeter=createVoiceLevelMeter(micStream,voiceSetMeter);
+      voiceSetMicState('listening','Recording audio…');
+      listening=true;
+
       if(window.MediaRecorder){
         recordedChunks=[];
         recorder=new MediaRecorder(micStream);
@@ -1079,29 +1137,55 @@ function mountVoiceConversation(convo){
         };
         recorder.onstop=()=>{
           const blob=new Blob(recordedChunks,{type:recorder.mimeType||'audio/mp4'});
-          cleanupInput();
+          listening=false;
+          stopMeter();
+          stopMeter=()=>{};
+          stopMediaStream(micStream);
+          micStream=null;
+          voiceSetMeter(0);
+
           voiceDiagSave({
             mediaRecorder:'working',
             lastAudioBytes:blob.size,
             lastAudioType:blob.type
           });
+
           const player=document.querySelector('#voice-recording-preview');
           if(player){
             player.src=URL.createObjectURL(blob);
             player.hidden=false;
           }
+
           voiceSetMicState('recorded',`Audio captured (${Math.round(blob.size/1024)} KB)`);
-          interim.textContent='Your microphone is working. Cloud transcription is needed to turn this recording into text.';
+          interim.textContent='Microphone recording works. Cloud transcription is required for this fallback audio.';
         };
         recorder.start();
       }else{
-        throw new Error('Microphone opened, but neither speech recognition nor audio recording is available.');
+        throw new Error('Audio recording is unavailable in this browser.');
       }
 
     }catch(error){
-      cleanupInput();
-      voiceDiagSave({microphonePermission:`error:${error.name||'unknown'}`,error:error.message});
-      voiceSetMicState('error',error.name==='NotAllowedError'?'Microphone permission denied':'Microphone unavailable');
+      listening=false;
+      try{recognition?.abort()}catch{}
+      recognition=null;
+      stopMeter();
+      stopMeter=()=>{};
+      stopMediaStream(micStream);
+      micStream=null;
+      voiceSetMeter(0);
+
+      voiceDiagSave({
+        microphonePermission:`error:${error.name||'unknown'}`,
+        error:error.message
+      });
+
+      voiceSetMicState(
+        'error',
+        error.name==='NotAllowedError'
+          ? 'Microphone permission denied'
+          : 'Microphone unavailable'
+      );
+
       interim.textContent=error.name==='NotAllowedError'
         ? 'Please allow Microphone access for this website in iPhone Settings / Safari.'
         : `Microphone error: ${error.message}`;
@@ -1109,13 +1193,26 @@ function mountVoiceConversation(convo){
   }
 
   function stopListening(){
+    clearTimeout(autoListenTimer);
+
     if(recorder && recorder.state==='recording'){
       try{recorder.stop()}catch{}
       recorder=null;
       return;
     }
-    try{recognition?.stop()}catch{}
-    cleanupInput();
+
+    if(recognition){
+      try{recognition.abort()}catch{}
+      recognition=null;
+    }
+
+    listening=false;
+    stopMeter();
+    stopMeter=()=>{};
+    stopMediaStream(micStream);
+    micStream=null;
+    voiceSetMeter(0);
+    voiceSetMicState('idle','Stopped');
   }
 
   send.onclick=()=>handleUser(input.value);
@@ -1824,7 +1921,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 011 Hands-Free Voice · Booking Calendar Build 002 · Local AI Beta 001.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 011.1 iPhone Voice Loop Fix · Booking Calendar Build 002 · Local AI Beta 001.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -1997,7 +2094,7 @@ function shell(){
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Voice AI Build 011 Hands-Free Voice</div>
+        <div class="build-label">Voice AI Build 011.1 iPhone Voice Loop Fix</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
