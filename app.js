@@ -198,7 +198,7 @@ async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'
 
 
 
-/* ===== Voice AI Build 010.4 Route Restore ===== */
+/* ===== Voice AI Build 010.5 Stable Fix ===== */
 const PLATFORM_ROLE_KEY='lingguang-platform-role-v4';
 const PLATFORM_USER_KEY='lingguang-platform-user-v4';
 
@@ -219,36 +219,6 @@ function applicationTone(status){
   return status==='Rejected'?'danger':status==='Need More Information'||status==='Waiting Review'?'warning':'default';
 }
 
-
-function openRoleLogin(role){
-  const safe=['professional','patient','admin'].includes(role)?role:'professional';
-  try{
-    if(typeof router!=='undefined' && router && typeof router.go==='function'){
-      router.go(`role-login?role=${encodeURIComponent(safe)}`);
-    }else{
-      location.hash=`#role-login?role=${encodeURIComponent(safe)}`;
-      setTimeout(()=>render().catch(showRouteError),0);
-    }
-  }catch(error){showRouteError(error)}
-}
-window.LINGGUANG_OPEN_ROLE=openRoleLogin;
-
-function bindPlatformRoleChoices(){
-  document.querySelectorAll('[data-role-choice]').forEach(button=>{
-    button.disabled=false;
-    button.style.pointerEvents='auto';
-    button.onclick=event=>{
-      event.preventDefault();
-      event.stopPropagation();
-      openRoleLogin(button.dataset.roleChoice);
-    };
-    button.addEventListener('touchend',event=>{
-      event.preventDefault();
-      openRoleLogin(button.dataset.roleChoice);
-    },{passive:false});
-  });
-}
-
 async function platformEntryPage(){
   return {title:'LINGGUANG',subtitle:'Choose your portal',html:`
     <section class="platform-entry-page">
@@ -258,119 +228,50 @@ async function platformEntryPage(){
         <p>AI-powered integrative healthcare platform</p>
       </div>
       <div class="platform-role-grid">
-        <button type="button" class="platform-role-card professional" data-role-choice="professional" onclick="LINGGUANG_OPEN_ROLE('professional')">
+        <button class="platform-role-card professional" data-role-choice="professional">
           <b>👨‍⚕️</b><strong>Healthcare Professional</strong><span>Practitioner · Therapist · Reception</span><i>Enter Professional Portal ›</i>
         </button>
-        <button type="button" class="platform-role-card patient" data-role-choice="patient" onclick="LINGGUANG_OPEN_ROLE('patient')">
+        <button class="platform-role-card patient" data-role-choice="patient">
           <b>🧑</b><strong>Patient Portal</strong><span>Requests · Appointments · Assessments</span><i>Enter Patient Portal ›</i>
         </button>
-        <button type="button" class="platform-role-card admin" data-role-choice="admin" onclick="LINGGUANG_OPEN_ROLE('admin')">
+        <button class="platform-role-card admin" data-role-choice="admin">
           <b>🏥</b><strong>Clinic Administration</strong><span>Staff · Rooms · Services · Reports</span><i>Enter Admin Portal ›</i>
         </button>
       </div>
-      <div class="platform-login-fallback">
-        <button type="button" onclick="LINGGUANG_OPEN_ROLE('professional')">Professional Login</button>
-        <button type="button" onclick="LINGGUANG_OPEN_ROLE('patient')">Patient Login</button>
-        <button type="button" onclick="LINGGUANG_OPEN_ROLE('admin')">Admin Login</button>
-      </div>
       <div class="platform-entry-footer"><button class="text-button" data-route="clinic-create">Create a New Clinic</button><span>English · 中文 · Français</span></div>
     </section>`,
-    mount(){bindPlatformRoleChoices()}};
+    mount(){document.querySelectorAll('[data-role-choice]').forEach(b=>b.onclick=()=>router.go(`role-login?role=${b.dataset.roleChoice}`))}};
 }
-
-
-function completeRoleLogin(role){
-  try{
-    const safe=['professional','patient','admin'].includes(role)?role:'professional';
-    const form=document.querySelector('#role-login-form');
-    if(!form)throw new Error('Login form is unavailable');
-
-    if(safe==='patient'){
-      const patientId=form.querySelector('[name="patientId"]')?.value||'';
-      const d=readStore();
-      const patient=d.patients.find(x=>x.id===patientId);
-      if(!patient){toast('Select a patient profile');return}
-      setPlatformSession('patient',{patientId:patient.id,name:patient.name});
-      if(typeof router!=='undefined' && router && typeof router.go==='function')router.go('patient-portal');
-      else location.hash='#patient-portal';
-    }else{
-      const username=form.querySelector('[name="username"]')?.value?.trim()||
-        (safe==='admin'?'Clinic Admin':'Dr. Ling');
-      setPlatformSession(safe,{name:username});
-      if(typeof router!=='undefined' && router && typeof router.go==='function'){
-        router.go(safe==='admin'?'admin-portal':'today');
-      }else{
-        location.hash=safe==='admin'?'#admin-portal':'#today';
-      }
-    }
-
-    setTimeout(()=>render().catch(showRouteError),0);
-  }catch(error){
-    showRouteError(error);
-  }
-}
-window.LINGGUANG_COMPLETE_LOGIN=completeRoleLogin;
 
 async function roleLoginPage(){
   const role=routeParams.get('role')||'professional',d=readStore();
-  const safe=['professional','patient','admin'].includes(role)?role:'professional';
-  const title=safe==='patient'?'Patient Portal':safe==='admin'?'Clinic Administration':'Healthcare Professional';
-
+  const title=role==='patient'?'Patient Portal':role==='admin'?'Clinic Administration':'Healthcare Professional';
   return {title,subtitle:'Secure portal entry',html:`
     ${backBar('platform-entry','Portal Selection')}
     <section class="role-login-wrap"><div class="role-login-card">
       <img src="lingguang-logo-full.png?v=2.5.0-icon008" alt="LINGGUANG HEALTH official logo" class="official-logo-full">
       <span class="role-login-type">${title}</span><h2>Welcome</h2>
-
-      <div id="role-login-form" class="role-login-fields" autocomplete="off">
-        ${safe==='patient'?`
-          <label>Patient Profile
-            <select name="patientId">
-              <option value="">Select patient</option>
-              ${d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}
-            </select>
-          </label>
-          <label>Phone or access code
-            <input name="credential" type="text" inputmode="text" autocomplete="off" value="demo">
-          </label>
+      <form id="role-login-form">
+        ${role==='patient'?`
+          <label>Patient Profile<select name="patientId" required><option value="">Select patient</option>${d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></label>
+          <label>Phone or access code<input name="credential" required value="demo"></label>
         `:`
-          <label>Email or username
-            <input name="username" type="text" inputmode="text" autocomplete="off"
-              value="${safe==='admin'?'Clinic Admin':'Dr. Ling'}">
-          </label>
-          <label>Password
-            <input name="password" type="text" inputmode="text" autocomplete="off"
-              value="lingguang">
-          </label>
+          <label>Email or username<input name="username" required value="${role==='admin'?'Clinic Admin':'Dr. Ling'}"></label>
+          <label>Password<input name="password" type="password" required value="lingguang"></label>
         `}
-
         <label class="remember"><input type="checkbox" checked> Remember this session</label>
-
-        <button type="button"
-          class="button primary role-login-submit"
-          id="direct-role-login"
-          onclick="LINGGUANG_COMPLETE_LOGIN('${safe}')">
-          Enter ${title}
-        </button>
-      </div>
-
-      ${safe==='patient'&&!d.patients.length?'<div class="notice">No patient profile exists yet. Enter the Professional Portal first and create one.</div>':''}
+        <button class="button primary role-login-submit">Enter ${title}</button>
+      </form>
+      ${role==='patient'&&!d.patients.length?'<div class="notice">No patient profile exists yet. Enter the Professional Portal first and create one.</div>':''}
     </div></section>`,
-    mount(){
-      const button=document.querySelector('#direct-role-login');
-      if(!button){showRouteError(new Error('Direct login button was not mounted'));return}
-      button.disabled=false;
-      button.style.pointerEvents='auto';
-      button.onclick=event=>{
-        event.preventDefault();
-        event.stopPropagation();
-        completeRoleLogin(safe);
-      };
-      button.addEventListener('touchend',event=>{
-        event.preventDefault();
-        completeRoleLogin(safe);
-      },{passive:false});
-    }};
+    mount(){document.querySelector('#role-login-form').onsubmit=e=>{
+      e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));
+      if(role==='patient'){
+        const p=d.patients.find(x=>x.id===v.patientId);if(!p)return toast('Select a patient');
+        setPlatformSession('patient',{patientId:p.id,name:p.name});
+      }else setPlatformSession(role,{name:v.username||title});
+      router.go(roleHome(role));
+    }}};
 }
 
 async function patientPortalPage(){
@@ -498,42 +399,57 @@ async function adminPlaceholderPage(){
 
 
 
-/* ===== Voice AI Build 010.4 Route Restore ===== */
+/* ===== Voice AI Build 010.5 Stable Fix ===== */
 const SpeechRecognitionAPI=window.SpeechRecognition||window.webkitSpeechRecognition;
 function voiceNewSession(patient){return{id:crypto.randomUUID(),code:`VS-${Date.now()}`,patientId:patient?.id||'',patientName:patient?.name||'',doctor:platformUser().name||'Dr. Ling',startedAt:new Date().toISOString(),endedAt:'',status:'Draft',language:'en-CA',transcript:'',soap:{subjective:'',objective:'',assessment:'',plan:''},confidence:0,confirmed:false}}
 function voiceSaveSession(s){updateStore(d=>{d.voiceSessions=d.voiceSessions||[];const i=d.voiceSessions.findIndex(x=>x.id===s.id);i>=0?d.voiceSessions[i]=s:d.voiceSessions.push(s)})}
 function voiceSOAP(text){const t=String(text||'').trim(),l=t.toLowerCase(),missing=[];if(/pain|疼|痛/.test(l)&&!/\b(10|[0-9])\s*(?:\/\s*10|out of 10)?\b/.test(l))missing.push('Pain score (VAS) is missing.');if(/shoulder|肩/.test(l)&&!/rom|range of motion|活动度|活动范围/.test(l))missing.push('Consider documenting shoulder ROM.');return{subjective:t,objective:/rom|range of motion|检查|活动度/.test(l)?t:'',assessment:/improv|better|worse|改善|加重/.test(l)?t:'',plan:/acupuncture|针灸|cupping|拔罐|plan|计划|复诊/.test(l)?t:'',missing,confidence:t.length>20?88:72}}
 function voiceIntent(text){const t=String(text||'').toLowerCase();if(/预约|calendar|appointment/.test(t))return['booking-calendar?view=day&date='+calendarTodayISO(),'Today calendar'];if(/申请|application/.test(t))return['applications-waiting','Pending applications'];if(/新建患者|new patient/.test(t))return['patient-new','New patient'];if(/病历|clinical note/.test(t))return['clinical-new','Clinical note'];return null}
-async function voiceAIPage(){const d=readStore(),rows=(d.voiceSessions||[]).slice().reverse();return{title:'Voice AI',subtitle:'Consultation and reviewed voice drafts',html:`${backBar('today','Dashboard')}<div class="build-badge">Build 010.4</div>${hero('LINGGUANG Voice AI','Create a consultation session, dictate a draft and confirm it before saving.','<div class="button-row"><button class="button primary" type="button" onclick="LINGGUANG_OPEN_VOICE()">Start Voice Conversation</button><button class="button secondary" data-route="voice-consultation">Start Consultation</button></div>')}<div class="voice-status-grid"><div class="voice-status-card"><span>Browser Speech</span><strong>${SpeechRecognitionAPI?'Available':'Typed Fallback'}</strong><small>Cloud speech is not connected yet.</small></div><div class="voice-status-card"><span>Safety</span><strong>Review Required</strong><small>No voice draft becomes a clinical note automatically.</small></div><div class="voice-status-card"><span>Sessions</span><strong>${rows.length}</strong><small>${rows.filter(x=>x.status!=='Saved').length} awaiting review</small></div></div><div class="panel"><div class="menu-list"><button class="menu-entry voice-conversation-entry" type="button" onclick="LINGGUANG_OPEN_VOICE()">
-  <span class="menu-icon">💬</span>
-  <span class="menu-copy"><strong>Voice Conversation</strong><small>Talk with LINGGUANG and receive spoken follow-up questions</small></span>
-  <span class="menu-arrow">›</span>
-</button>${menuCard('🩺','Consultation Workspace','Patient-linked voice session','voice-consultation')}${menuCard('🧭','Voice Command','Open common modules by voice','voice-command')}${menuCard('✅','Review Center','Review and save voice drafts','voice-review')}</div></div><div class="notice">Build 010 adds a working voice conversation loop with spoken questions, speech input, typed fallback, context memory and reviewed summaries. Cloud language-model connection remains optional.</div>`}}
+async function voiceAIPage(){const d=readStore(),rows=(d.voiceSessions||[]).slice().reverse();return{title:'Voice AI',subtitle:'Consultation and reviewed voice drafts',html:`${backBar('today','Dashboard')}<div class="build-badge">Build 010.5 Stable</div>${hero('LINGGUANG Voice AI','Create a consultation session, dictate a draft and confirm it before saving.','<button class="button primary" data-route="voice-consultation">Start Consultation</button>')}<div class="voice-status-grid"><div class="voice-status-card"><span>Browser Speech</span><strong>${SpeechRecognitionAPI?'Available':'Typed Fallback'}</strong><small>Cloud speech is not connected yet.</small></div><div class="voice-status-card"><span>Safety</span><strong>Review Required</strong><small>No voice draft becomes a clinical note automatically.</small></div><div class="voice-status-card"><span>Sessions</span><strong>${rows.length}</strong><small>${rows.filter(x=>x.status!=='Saved').length} awaiting review</small></div></div><div class="panel"><div class="menu-list">${menuCard('💬','Voice Conversation','Talk with LINGGUANG and receive spoken follow-up questions','voice-conversation')}${menuCard('🩺','Consultation Workspace','Patient-linked voice session','voice-consultation')}${menuCard('🧭','Voice Command','Open common modules by voice','voice-command')}${menuCard('✅','Review Center','Review and save voice drafts','voice-review')}</div></div><div class="notice">Build 010 adds a working voice conversation loop with spoken questions, speech input, typed fallback, context memory and reviewed summaries. Cloud language-model connection remains optional.</div>`}}
 async function voiceConsultationPage(){const d=readStore();return{title:'Consultation Workspace',subtitle:'Create a voice session',html:`${backBar('voice-ai','Voice AI')}${hero('Start Consultation','Select a patient and begin a reviewed session.')}<div class="panel"><form id="voice-start-form" class="form-grid"><label>Patient<select name="patientId" required><option value="">Select patient</option>${d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></label><label>Language<select name="language"><option value="en-CA">English</option><option value="zh-CN">中文</option><option value="yue-Hant-HK">粵語</option><option value="fr-CA">Français</option></select></label><label>Session Type<select name="sessionType"><option>Follow-up Consultation</option><option>Initial Consultation</option><option>Treatment Session</option></select></label><div class="form-action"><button class="button primary">Create Session</button></div></form></div>`,mount(){document.querySelector('#voice-start-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget)),p=d.patients.find(x=>x.id===v.patientId);if(!p)return toast('Select a patient');const s=voiceNewSession(p);s.language=v.language;s.sessionType=v.sessionType;voiceSaveSession(s);router.go(`voice-session?id=${s.id}`)}}}}
 async function voiceSessionPage(){const s=(readStore().voiceSessions||[]).find(x=>x.id===routeParams.get('id'));if(!s)return{title:'Voice Session',subtitle:'Not found',html:empty('Session not found')};return{title:'Voice Session',subtitle:s.patientName,html:`${backBar('voice-ai','Voice AI')}<section class="voice-session-banner"><div><span>${escapeHtml(s.code)}</span><h2>${escapeHtml(s.patientName)}</h2><p>${escapeHtml(s.sessionType||'Consultation')} · ${escapeHtml(s.doctor)}</p></div><div><b id="voice-state">Draft</b></div></section><div class="voice-workspace-grid"><section class="panel"><div class="panel-head"><h3>Live Transcript</h3><span>${SpeechRecognitionAPI?'Ready':'Typed fallback'}</span></div><label>Language<select id="voice-language"><option value="en-CA">English</option><option value="zh-CN">中文</option><option value="yue-Hant-HK">粵語</option><option value="fr-CA">Français</option></select></label><button type="button" class="voice-record-button" id="voice-record"><span>🎙</span><strong>Start Listening</strong><small>Tap to begin</small></button><textarea id="voice-transcript" rows="11" placeholder="Speak or type here">${escapeHtml(s.transcript||'')}</textarea><div class="button-row"><button class="button secondary" id="voice-command-test">Run as Command</button><button class="button primary" id="voice-soap">Generate SOAP Draft</button></div></section><section class="panel"><h3>Clinical Copilot</h3><div id="voice-copilot" class="voice-empty">Generate a draft to see documentation reminders.</div></section></div>`,mount(){let r=null,listening=false;const box=document.querySelector('#voice-transcript'),btn=document.querySelector('#voice-record'),lang=document.querySelector('#voice-language');lang.value=s.language||'en-CA';if(SpeechRecognitionAPI){r=new SpeechRecognitionAPI();r.continuous=true;r.interimResults=false;r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)box.value=(box.value+' '+e.results[i][0].transcript).trim();s.transcript=box.value;voiceSaveSession(s)};r.onend=()=>{if(listening)try{r.start()}catch{}}}btn.onclick=()=>{if(!r)return toast('Live browser speech unavailable. Type the transcript instead.');listening=!listening;r.lang=lang.value;try{listening?r.start():r.stop()}catch{}btn.classList.toggle('listening',listening);btn.querySelector('strong').textContent=listening?'Listening…':'Start Listening'};box.oninput=()=>{s.transcript=box.value;voiceSaveSession(s)};document.querySelector('#voice-command-test').onclick=()=>{const x=voiceIntent(box.value);if(x){toast(`Opening ${x[1]}`);router.go(x[0])}else toast('Clinical content detected. Generate a SOAP draft instead.')};document.querySelector('#voice-soap').onclick=()=>{s.transcript=box.value;if(!s.transcript.trim())return toast('Add transcript text first');s.soap=voiceSOAP(s.transcript);s.confidence=s.soap.confidence;s.status='Review';voiceSaveSession(s);router.go(`voice-review-session?id=${s.id}`)}}}}
 async function voiceReviewSessionPage(){const s=(readStore().voiceSessions||[]).find(x=>x.id===routeParams.get('id'));if(!s)return voiceReviewPage();const q=s.soap||voiceSOAP(s.transcript);return{title:'Voice Review',subtitle:s.patientName,html:`${backBar(`voice-session?id=${s.id}`,'Voice Session')}${hero('Review Before Saving','Edit every section. Nothing enters the clinical record until confirmed.')}<div class="panel"><form id="voice-review-form" class="form-grid"><label class="wide">Subjective<textarea name="subjective" rows="5">${escapeHtml(q.subjective||'')}</textarea></label><label class="wide">Objective<textarea name="objective" rows="4">${escapeHtml(q.objective||'')}</textarea></label><label class="wide">Assessment<textarea name="assessment" rows="4">${escapeHtml(q.assessment||'')}</textarea></label><label class="wide">Plan<textarea name="plan" rows="4">${escapeHtml(q.plan||'')}</textarea></label><div class="wide">${(q.missing||[]).map(x=>`<div class="voice-suggestion">⚠ ${escapeHtml(x)}</div>`).join('')}</div><div class="form-action"><button class="button primary">Confirm & Save Clinical Note</button></div></form></div>`,mount(){document.querySelector('#voice-review-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));s.soap=v;s.status='Saved';s.confirmed=true;s.endedAt=new Date().toISOString();voiceSaveSession(s);updateStore(d=>d.clinicalNotes.push({id:crypto.randomUUID(),patientId:s.patientId,date:calendarTodayISO(),type:'Voice SOAP Note',note:`S: ${v.subjective}\n\nO: ${v.objective}\n\nA: ${v.assessment}\n\nP: ${v.plan}`,sessionId:s.id,createdAt:new Date().toISOString()}));toast('Voice note saved to Clinical');router.go(`patient-clinical?patient=${s.patientId}`)}}}}
 async function voiceCommandPage(){return{title:'Voice Command',subtitle:'Local navigation',html:`${backBar('voice-ai','Voice AI')}${hero('Voice Command','Test common commands without a language-model call.')}<div class="panel"><label>Command<input id="voice-command-input" placeholder="Open today calendar"></label><div class="button-row"><button class="button secondary" id="voice-command-speak">🎙 Speak</button><button class="button primary" id="voice-command-run">Run</button></div></div>`,mount(){const input=document.querySelector('#voice-command-input');document.querySelector('#voice-command-speak').onclick=()=>{if(!SpeechRecognitionAPI)return toast('Browser speech unavailable');const r=new SpeechRecognitionAPI();r.onresult=e=>input.value=e.results[0][0].transcript;r.start()};document.querySelector('#voice-command-run').onclick=()=>{const x=voiceIntent(input.value);x?router.go(x[0]):toast('Command not recognized')}}}}
 async function voiceReviewPage(){const rows=(readStore().voiceSessions||[]).slice().reverse();return{title:'Voice Review Center',subtitle:'Sessions',html:`${backBar('voice-ai','Voice AI')}${hero('Review Center','Every voice session remains a draft until confirmed.')}<div class="panel">${rows.length?rows.map(s=>`<button class="application-list-row" data-vs="${s.id}"><div><strong>${escapeHtml(s.patientName||'Unassigned')}</strong><small>${escapeHtml(s.code)} · ${new Date(s.startedAt).toLocaleString()}</small></div>${badge(s.status,s.status==='Saved'?'default':'warning')}<span>›</span></button>`).join(''):empty('No voice sessions yet.')}</div>`,mount(){document.querySelectorAll('[data-vs]').forEach(b=>b.onclick=()=>router.go(`voice-review-session?id=${b.dataset.vs}`))}}}
-
-function openVoiceConversation(){
-  try{
-    if(typeof router!=='undefined' && router && typeof router.go==='function'){
-      router.go('voice-conversation');
-    }else{
-      location.hash='#voice-conversation';
-      setTimeout(()=>render().catch(showRouteError),0);
-    }
-  }catch(error){
-    showRouteError(error);
-  }
-}
-window.LINGGUANG_OPEN_VOICE=openVoiceConversation;
-
-function bindVoiceHeader(){const b=document.querySelector('#voice-header-button');if(b){b.hidden=!platformRole();b.onclick=openVoiceConversation}}
+function bindVoiceHeader(){const b=document.querySelector('#voice-header-button');if(b){b.hidden=!platformRole();b.onclick=()=>router.go('voice-conversation')}}
 async function voicePatientPage(){
   router.go('voice-conversation');
   return{title:'Patient Voice Intake',subtitle:'Opening conversation',html:'<div class="notice">Opening Voice Conversation…</div>'};
 }
+
+const VOICE_CONVO_KEY='lingguang-voice-conversation-v1';
+
+function voiceConversationId(){
+  try{
+    if(window.crypto && typeof window.crypto.randomUUID==='function'){
+      return window.crypto.randomUUID();
+    }
+  }catch{}
+  return `voice-${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
+}
+
+function voiceConversationInitial(language='en-CA',role='patient'){
+  return{
+    id:voiceConversationId(),
+    role,
+    language,
+    stage:'concern',
+    messages:[],
+    facts:{
+      concern:'',
+      duration:'',
+      location:'',
+      severity:'',
+      pattern:'',
+      sleep:'',
+      treatment:'',
+      goal:''
+    },
+    completed:false,
+    createdAt:new Date().toISOString()
+  };
+}
+
 function voiceConversationCopy(language){
   const zh=String(language).startsWith('zh')||String(language).startsWith('yue');
   return zh ? {
@@ -670,6 +586,7 @@ function voiceConversationSummaryHTML(convo){
 }
 
 async function voiceConversationPage(){
+  try{
   const requestedLanguage=routeParams.get('language')||'en-CA';
   const requestedRole=platformRole()==='patient'?'patient':'professional';
   let convo=voiceConversationLoad();
@@ -719,6 +636,19 @@ async function voiceConversationPage(){
       </div>`,
     mount(){mountVoiceConversation(convo)}
   };
+  }catch(error){
+    console.error('Voice Conversation error',error);
+    return{
+      title:'Voice Conversation',
+      subtitle:'Conversation could not start',
+      html:`${backBar('voice-ai','Voice AI')}
+        <div class="panel voice-error-card">
+          <h3>Voice Conversation could not start</h3>
+          <p>${escapeHtml(error?.message||String(error))}</p>
+          <button class="button primary" data-route="voice-conversation">Try Again</button>
+        </div>`
+    };
+  }
 }
 
 function mountVoiceConversation(convo){
@@ -1440,7 +1370,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 010.4 Route Restore · Booking Calendar Build 002 · Local AI Beta 001.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 010.5 Stable Fix · Booking Calendar Build 002 · Local AI Beta 001.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -1613,7 +1543,7 @@ function shell(){
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Voice AI Build 010.4 Route Restore</div>
+        <div class="build-label">Voice AI Build 010.5 Stable Fix</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -1730,10 +1660,7 @@ function parentRoute(route,params){
 async function render(){
   let {route,params}=currentRouteInfo();routeParams=params;const role=platformRole();
   if(!allowedForRole(route,role)){route=roleHome(role);history.replaceState(null,'',`#/${route}`);routeParams=new URLSearchParams()}
-  const page=routes[route]||routes[roleHome(role)]||routes['platform-entry'];
-  let result;
-  try{result=await page()}
-  catch(error){showRouteError(error);return}
+  const page=routes[route]||routes[roleHome(role)]||routes['platform-entry'],result=await page();
   document.querySelector('#page-title').textContent=result.title||'';
   document.querySelector('#page-subtitle').textContent=result.subtitle||'';
   document.querySelector('#page-root').innerHTML=result.html||'';
@@ -1754,35 +1681,7 @@ function bindBrandHome(){
 }
 
 const router={go(route){location.hash=`#/${route}`},start(){
-  
-  
-  document.addEventListener('click',event=>{
-    const loginButton=event.target.closest('#direct-role-login');
-    if(loginButton){
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      const role=routeParams.get('role')||'professional';
-      completeRoleLogin(role);
-    }
-  },true);
-
-  document.addEventListener('click',event=>{
-    const roleCard=event.target.closest('[data-role-choice]');
-    if(roleCard){
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      openRoleLogin(roleCard.dataset.roleChoice);
-    }
-  },true);
-
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('[data-route]');
-    if(!b)return;
-    e.preventDefault();
-    const target=b.dataset.route;
-    if(target==='voice-conversation'){openVoiceConversation();return}
-    router.go(target);
-  });
+  document.addEventListener('click',e=>{const b=e.target.closest('[data-route]');if(b){e.preventDefault();router.go(b.dataset.route)}});
   addEventListener('hashchange',render);render();
 }};
 window.LINGGUANG_NAV={go:r=>router.go(r),goBack:r=>router.go(r||roleHome())};
