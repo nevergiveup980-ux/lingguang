@@ -198,7 +198,7 @@ async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'
 
 
 
-/* ===== Voice AI Build 010.1 Route Fix ===== */
+/* ===== Voice AI Build 010.2 Login Fix ===== */
 const PLATFORM_ROLE_KEY='lingguang-platform-role-v4';
 const PLATFORM_USER_KEY='lingguang-platform-user-v4';
 
@@ -219,6 +219,30 @@ function applicationTone(status){
   return status==='Rejected'?'danger':status==='Need More Information'||status==='Waiting Review'?'warning':'default';
 }
 
+
+function openRoleLogin(role){
+  const safe=['professional','patient','admin'].includes(role)?role:'professional';
+  location.hash=`#/role-login?role=${encodeURIComponent(safe)}`;
+  setTimeout(()=>render().catch(showRouteError),0);
+}
+window.LINGGUANG_OPEN_ROLE=openRoleLogin;
+
+function bindPlatformRoleChoices(){
+  document.querySelectorAll('[data-role-choice]').forEach(button=>{
+    button.disabled=false;
+    button.style.pointerEvents='auto';
+    button.onclick=event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      openRoleLogin(button.dataset.roleChoice);
+    };
+    button.addEventListener('touchend',event=>{
+      event.preventDefault();
+      openRoleLogin(button.dataset.roleChoice);
+    },{passive:false});
+  });
+}
+
 async function platformEntryPage(){
   return {title:'LINGGUANG',subtitle:'Choose your portal',html:`
     <section class="platform-entry-page">
@@ -228,19 +252,24 @@ async function platformEntryPage(){
         <p>AI-powered integrative healthcare platform</p>
       </div>
       <div class="platform-role-grid">
-        <button class="platform-role-card professional" data-role-choice="professional">
+        <button type="button" class="platform-role-card professional" data-role-choice="professional" onclick="LINGGUANG_OPEN_ROLE('professional')">
           <b>👨‍⚕️</b><strong>Healthcare Professional</strong><span>Practitioner · Therapist · Reception</span><i>Enter Professional Portal ›</i>
         </button>
-        <button class="platform-role-card patient" data-role-choice="patient">
+        <button type="button" class="platform-role-card patient" data-role-choice="patient" onclick="LINGGUANG_OPEN_ROLE('patient')">
           <b>🧑</b><strong>Patient Portal</strong><span>Requests · Appointments · Assessments</span><i>Enter Patient Portal ›</i>
         </button>
-        <button class="platform-role-card admin" data-role-choice="admin">
+        <button type="button" class="platform-role-card admin" data-role-choice="admin" onclick="LINGGUANG_OPEN_ROLE('admin')">
           <b>🏥</b><strong>Clinic Administration</strong><span>Staff · Rooms · Services · Reports</span><i>Enter Admin Portal ›</i>
         </button>
       </div>
+      <div class="platform-login-fallback">
+        <button type="button" onclick="LINGGUANG_OPEN_ROLE('professional')">Professional Login</button>
+        <button type="button" onclick="LINGGUANG_OPEN_ROLE('patient')">Patient Login</button>
+        <button type="button" onclick="LINGGUANG_OPEN_ROLE('admin')">Admin Login</button>
+      </div>
       <div class="platform-entry-footer"><button class="text-button" data-route="clinic-create">Create a New Clinic</button><span>English · 中文 · Français</span></div>
     </section>`,
-    mount(){document.querySelectorAll('[data-role-choice]').forEach(b=>b.onclick=()=>router.go(`role-login?role=${b.dataset.roleChoice}`))}};
+    mount(){bindPlatformRoleChoices()}};
 }
 
 async function roleLoginPage(){
@@ -260,18 +289,22 @@ async function roleLoginPage(){
           <label>Password<input name="password" type="password" required value="lingguang"></label>
         `}
         <label class="remember"><input type="checkbox" checked> Remember this session</label>
-        <button class="button primary role-login-submit">Enter ${title}</button>
+        <button type="submit" class="button primary role-login-submit">Enter ${title}</button>
       </form>
       ${role==='patient'&&!d.patients.length?'<div class="notice">No patient profile exists yet. Enter the Professional Portal first and create one.</div>':''}
     </div></section>`,
-    mount(){document.querySelector('#role-login-form').onsubmit=e=>{
+    mount(){
+      const form=document.querySelector('#role-login-form');
+      if(!form){showRouteError(new Error('Login form was not mounted'));return}
+      form.onsubmit=e=>{
       e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));
       if(role==='patient'){
         const p=d.patients.find(x=>x.id===v.patientId);if(!p)return toast('Select a patient');
         setPlatformSession('patient',{patientId:p.id,name:p.name});
       }else setPlatformSession(role,{name:v.username||title});
       router.go(roleHome(role));
-    }}};
+    };
+    }};
 }
 
 async function patientPortalPage(){
@@ -399,7 +432,7 @@ async function adminPlaceholderPage(){
 
 
 
-/* ===== Voice AI Build 010.1 Route Fix ===== */
+/* ===== Voice AI Build 010.2 Login Fix ===== */
 const SpeechRecognitionAPI=window.SpeechRecognition||window.webkitSpeechRecognition;
 function voiceNewSession(patient){return{id:crypto.randomUUID(),code:`VS-${Date.now()}`,patientId:patient?.id||'',patientName:patient?.name||'',doctor:platformUser().name||'Dr. Ling',startedAt:new Date().toISOString(),endedAt:'',status:'Draft',language:'en-CA',transcript:'',soap:{subjective:'',objective:'',assessment:'',plan:''},confidence:0,confirmed:false}}
 function voiceSaveSession(s){updateStore(d=>{d.voiceSessions=d.voiceSessions||[];const i=d.voiceSessions.findIndex(x=>x.id===s.id);i>=0?d.voiceSessions[i]=s:d.voiceSessions.push(s)})}
@@ -1326,7 +1359,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 010.1 Route Fix · Booking Calendar Build 002 · Local AI Beta 001.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 010.2 Login Fix · Booking Calendar Build 002 · Local AI Beta 001.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -1499,7 +1532,7 @@ function shell(){
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Voice AI Build 010.1 Route Fix</div>
+        <div class="build-label">Voice AI Build 010.2 Login Fix</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -1640,6 +1673,16 @@ function bindBrandHome(){
 }
 
 const router={go(route){location.hash=`#/${route}`},start(){
+  
+  document.addEventListener('click',event=>{
+    const roleCard=event.target.closest('[data-role-choice]');
+    if(roleCard){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      openRoleLogin(roleCard.dataset.roleChoice);
+    }
+  },true);
+
   document.addEventListener('click',e=>{
     const b=e.target.closest('[data-route]');
     if(!b)return;

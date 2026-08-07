@@ -1,28 +1,24 @@
-# LINGGUANG Health OS — Voice AI Build 010.1 Route Fix
+# LINGGUANG Health OS — Voice AI Build 010.2 Login Fix
 
 ## Fixed
-- Voice Conversation card now uses a direct iPhone-safe click handler.
-- Added a prominent Start Voice Conversation button at the top of Voice AI.
-- Header microphone now opens the conversation directly.
-- Added safe ID generation for older iOS/PWA environments.
-- Added visible route-error reporting instead of silent failure.
-- Delegated routing now includes an explicit Voice Conversation fallback.
+- Restored all three Portal entry buttons:
+  - Healthcare Professional
+  - Patient Portal
+  - Clinic Administration
+- Role cards now use direct iPhone-safe handlers.
+- Added touch-event fallback for PWA use.
+- Added document-level emergency routing fallback.
+- Added three small direct login links below the cards.
+- Hardened login form mounting and submit handling.
+- Preserved Voice Conversation Build 010.1 fixes.
 
-## Test
-1. Open Voice AI.
-2. Tap Start Voice Conversation or the Voice Conversation card.
-3. The conversation page should open immediately.
-4. Type a response first to verify the conversation flow.
-5. Then test the microphone.
+## Test order
+1. Open Portal Selection.
+2. Tap Healthcare Professional.
+3. Return and test Patient Portal.
+4. Return and test Clinic Administration.
+5. Enter Professional Portal and test Voice AI.
+6. Tap Start Voice Conversation.
 
-## Mobile GitHub upload
-Replace:
-- index.html
-- app.js
-- local-ai.js
-- styles.css
-- README.md
-- lingguang-logo.png
-- lingguang-logo-full.png
-- favicon.png
-- apple-touch-icon.png
+## Upload
+Replace all files from this package in the GitHub repository root.

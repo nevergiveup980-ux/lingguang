@@ -516,3 +516,28 @@
 .voice-conversation-entry{position:relative;z-index:2;cursor:pointer!important;touch-action:manipulation}
 .route-error-card{max-width:650px;margin:30px auto;border:1px solid #e7b1a7;background:#fff6f3}
 .route-error-card h3{color:#8d342a}
+
+
+/* Voice AI Build 010.2 — Portal login fix */
+.platform-entry-page,
+.platform-role-grid,
+.platform-role-card{
+  position:relative;
+}
+.platform-entry-page{z-index:10}
+.platform-role-grid{z-index:20}
+.platform-role-card{
+  z-index:30!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:rgba(17,111,84,.15);
+}
+.platform-role-card:active{transform:scale(.985)}
+.platform-login-fallback{
+  display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px 0 8px
+}
+.platform-login-fallback button{
+  border:1px solid #b9d8cc;background:#fff;color:#0b614c;
+  border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer
+}
