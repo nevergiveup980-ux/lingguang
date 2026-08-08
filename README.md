@@ -1,25 +1,18 @@
-# LINGGUANG Health OS — Build 011.1 iPhone Voice Loop Fix
+# LINGGUANG Health OS — Build 012 Hybrid Local + GPT
 
-## Fix
-First-turn speech recognition worked, but the second answer could fail with:
-`Speech recognition: aborted`
+## AI modes
+- Local
+- Hybrid (default)
+- GPT Assist
 
-This build removes the simultaneous microphone conflict between:
-- Safari SpeechRecognition
-- getUserMedia / live audio meter
+Hybrid sends short/simple turns to Local AI and can route complex turns to the configured GPT backend.
+If GPT fails or is not configured, LINGGUANG automatically falls back to Local AI.
 
-## Changes
-- SpeechRecognition gets exclusive microphone ownership.
-- Live audio meter is disabled while Safari recognition is active.
-- `aborted` retries once after a 900 ms release delay.
-- Recognition objects are discarded between turns.
-- MediaRecorder is used only as a fallback.
-- Existing Hands-Free, Auto-listen and Patient Intake features remain.
+## Security
+No OpenAI API key is stored in the browser.
+Configure a secure backend from Voice AI → AI Engine Settings.
 
-## Test
-1. Leave Auto-listen OFF.
-2. Say: "I'm feeling a bit of stomach pain."
-3. After the next question, tap the mic again.
-4. Say: "One week or so."
-5. Confirm Duration updates.
-6. Then test Auto-listen.
+## Preserved
+- Build 011.1 iPhone multi-turn speech fix
+- Build 010.6 expanded Patient Intake
+- Existing login, booking, patient and clinical workflows

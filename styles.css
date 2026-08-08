@@ -598,3 +598,20 @@
 .voice-iphone-hint{
   display:block;margin-top:5px;color:#71867e;font-size:11px;font-weight:600
 }
+
+/* Build 012 — Hybrid Local + GPT */
+.voice-ai-engine-status{
+  display:flex;align-items:center;gap:8px;margin:10px 0 0;
+  padding:9px 10px;border-radius:12px;background:#f5faf7;
+  border:1px solid var(--line);color:var(--muted);
+  font-size:12px;font-weight:700
+}
+.ai-source-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:54px;padding:5px 8px;border-radius:999px;
+  font-size:10px;font-weight:900;letter-spacing:.04em
+}
+.ai-source-badge.local{background:#e6f3ec;color:#176048}
+.ai-source-badge.hybrid{background:#eee9fb;color:#59459b}
+.ai-source-badge.gpt{background:#e8effc;color:#315f9d}
+#voice-ai-mode{min-width:110px}
