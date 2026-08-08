@@ -615,3 +615,11 @@
 .ai-source-badge.hybrid{background:#eee9fb;color:#59459b}
 .ai-source-badge.gpt{background:#e8effc;color:#315f9d}
 #voice-ai-mode{min-width:110px}
+
+/* Build 013 — Clinical Voice Refinement */
+.voice-refinement-strip{display:flex;flex-wrap:wrap;gap:8px 14px;margin:10px 0 2px;padding:10px 12px;border-radius:12px;background:#fbfcfb;border:1px dashed #cfded7}
+.voice-refinement-strip label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#4b655d}
+.voice-refinement-strip input{width:auto!important;margin:0}
+.voice-confirm-panel{margin:10px 0;padding:13px;border-radius:14px;background:#fff7df;border:1px solid #e7cf83}
+.voice-confirm-panel>div:first-child{display:grid;gap:3px;margin-bottom:10px}
+.voice-confirm-panel small{color:#826c2c}

@@ -1,18 +1,14 @@
-# LINGGUANG Health OS — Build 012 Hybrid Local + GPT
+# LINGGUANG Health OS — Build 013 Clinical Voice Refinement
 
-## AI modes
-- Local
-- Hybrid (default)
-- GPT Assist
+Transfers the fine-grained RUNLU/Warehouse OS voice ideas into LINGGUANG:
 
-Hybrid sends short/simple turns to Local AI and can route complex turns to the configured GPT backend.
-If GPT fails or is not configured, LINGGUANG automatically falls back to Local AI.
+- Auto Chinese/English detection
+- Reply in the user's current language
+- Medical term correction
+- Low-confidence confirmation: Yes / Edit / Speak again
+- Voice command vs clinical-content separation
+- Local / Hybrid / GPT Assist routing preserved
+- iPhone multi-turn speech fix preserved
+- Clear Listening / Thinking / Speaking states preserved
 
-## Security
-No OpenAI API key is stored in the browser.
-Configure a secure backend from Voice AI → AI Engine Settings.
-
-## Preserved
-- Build 011.1 iPhone multi-turn speech fix
-- Build 010.6 expanded Patient Intake
-- Existing login, booking, patient and clinical workflows
+Voice commands can open today's calendar, patients, consultation, clinical notes, and pending applications.
