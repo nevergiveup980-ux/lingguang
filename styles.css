@@ -623,3 +623,23 @@
 .voice-confirm-panel{margin:10px 0;padding:13px;border-radius:14px;background:#fff7df;border:1px solid #e7cf83}
 .voice-confirm-panel>div:first-child{display:grid;gap:3px;margin-bottom:10px}
 .voice-confirm-panel small{color:#826c2c}
+
+/* Build 014 — Multi-AI Voice + Scan */
+.gateway-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gateway-provider-list{display:grid;gap:8px}
+.gateway-provider-list>div{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.scan-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+.scan-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.scan-file-button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:#f7faf8;font-weight:800;cursor:pointer}
+.scan-file-button input{display:none}
+.scan-preview-wrap{min-height:190px;border:1px dashed #bdd1c8;border-radius:16px;margin:14px 0;display:grid;place-items:center;overflow:hidden;background:#fafcfb}
+.scan-preview-wrap img{max-width:100%;max-height:360px;object-fit:contain}
+.scan-empty{color:var(--muted);padding:26px;text-align:center}
+.scan-result-empty{color:var(--muted);padding:18px 0}
+.scan-provider-line{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.scan-field{display:grid;grid-template-columns:130px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.scan-field span{color:var(--muted);font-size:12px}.scan-field strong{font-size:13px}
+.ledger-row{display:grid;grid-template-columns:1.4fr .8fr .7fr .6fr;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.ledger-row small{display:block;color:var(--muted);margin-top:3px}
+@media(max-width:800px){.gateway-grid,.scan-layout{grid-template-columns:1fr}.ledger-row{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.scan-field{grid-template-columns:1fr}.ledger-row{grid-template-columns:1fr}}

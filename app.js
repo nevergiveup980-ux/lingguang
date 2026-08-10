@@ -198,7 +198,7 @@ async function clinicPage(){const d=readStore();return{title:'Clinic',subtitle:'
 
 
 
-/* ===== Voice AI Build 013 Clinical Voice Refinement ===== */
+/* ===== Voice AI Build 014 Multi-AI Voice + Scan ===== */
 const PLATFORM_ROLE_KEY='lingguang-platform-role-v4';
 const PLATFORM_USER_KEY='lingguang-platform-user-v4';
 
@@ -551,13 +551,13 @@ async function adminPlaceholderPage(){
 
 
 
-/* ===== Voice AI Build 013 Clinical Voice Refinement ===== */
+/* ===== Voice AI Build 014 Multi-AI Voice + Scan ===== */
 const SpeechRecognitionAPI=window.SpeechRecognition||window.webkitSpeechRecognition;
 function voiceNewSession(patient){return{id:crypto.randomUUID(),code:`VS-${Date.now()}`,patientId:patient?.id||'',patientName:patient?.name||'',doctor:platformUser().name||'Dr. Ling',startedAt:new Date().toISOString(),endedAt:'',status:'Draft',language:'en-CA',transcript:'',soap:{subjective:'',objective:'',assessment:'',plan:''},confidence:0,confirmed:false}}
 function voiceSaveSession(s){updateStore(d=>{d.voiceSessions=d.voiceSessions||[];const i=d.voiceSessions.findIndex(x=>x.id===s.id);i>=0?d.voiceSessions[i]=s:d.voiceSessions.push(s)})}
 function voiceSOAP(text){const t=String(text||'').trim(),l=t.toLowerCase(),missing=[];if(/pain|疼|痛/.test(l)&&!/\b(10|[0-9])\s*(?:\/\s*10|out of 10)?\b/.test(l))missing.push('Pain score (VAS) is missing.');if(/shoulder|肩/.test(l)&&!/rom|range of motion|活动度|活动范围/.test(l))missing.push('Consider documenting shoulder ROM.');return{subjective:t,objective:/rom|range of motion|检查|活动度/.test(l)?t:'',assessment:/improv|better|worse|改善|加重/.test(l)?t:'',plan:/acupuncture|针灸|cupping|拔罐|plan|计划|复诊/.test(l)?t:'',missing,confidence:t.length>20?88:72}}
 function voiceIntent(text){const t=String(text||'').toLowerCase();if(/预约|calendar|appointment/.test(t))return['booking-calendar?view=day&date='+calendarTodayISO(),'Today calendar'];if(/申请|application/.test(t))return['applications-waiting','Pending applications'];if(/新建患者|new patient/.test(t))return['patient-new','New patient'];if(/病历|clinical note/.test(t))return['clinical-new','Clinical note'];return null}
-async function voiceAIPage(){const d=readStore(),rows=(d.voiceSessions||[]).slice().reverse();return{title:'Voice AI',subtitle:'Consultation and reviewed voice drafts',html:`${backBar('today','Dashboard')}<div class="build-badge">Build 013 Clinical Voice Refinement</div>${hero('LINGGUANG Voice AI','Create a consultation session, dictate a draft and confirm it before saving.','<button class="button primary" data-route="voice-consultation">Start Consultation</button>')}<div class="voice-status-grid"><div class="voice-status-card"><span>Browser Speech</span><strong>${SpeechRecognitionAPI?'Available':'Typed Fallback'}</strong><small>Cloud speech is not connected yet.</small></div><div class="voice-status-card"><span>Safety</span><strong>Review Required</strong><small>No voice draft becomes a clinical note automatically.</small></div><div class="voice-status-card"><span>Sessions</span><strong>${rows.length}</strong><small>${rows.filter(x=>x.status!=='Saved').length} awaiting review</small></div></div><div class="panel"><div class="menu-list">${menuCard('💬','Voice Conversation','Talk with LINGGUANG and receive spoken follow-up questions','voice-conversation')}${menuCard('🩺','Consultation Workspace','Patient-linked voice session','voice-consultation')}${menuCard('🧭','Voice Command','Open common modules by voice','voice-command')}${menuCard('⚙️','AI Engine Settings','Choose Local, Hybrid or GPT Assist','ai-engine-settings')}${menuCard('✅','Review Center','Review and save voice drafts','voice-review')}</div></div><div class="notice">Build 010 adds a working voice conversation loop with spoken questions, speech input, typed fallback, context memory and reviewed summaries. Cloud language-model connection remains optional.</div>`}}
+async function voiceAIPage(){const d=readStore(),rows=(d.voiceSessions||[]).slice().reverse();return{title:'Voice AI',subtitle:'Consultation and reviewed voice drafts',html:`${backBar('today','Dashboard')}<div class="build-badge">Build 014 Multi-AI Voice + Scan</div>${hero('LINGGUANG Voice AI','Create a consultation session, dictate a draft and confirm it before saving.','<button class="button primary" data-route="voice-consultation">Start Consultation</button>')}<div class="voice-status-grid"><div class="voice-status-card"><span>Browser Speech</span><strong>${SpeechRecognitionAPI?'Available':'Typed Fallback'}</strong><small>Cloud speech is not connected yet.</small></div><div class="voice-status-card"><span>Safety</span><strong>Review Required</strong><small>No voice draft becomes a clinical note automatically.</small></div><div class="voice-status-card"><span>Sessions</span><strong>${rows.length}</strong><small>${rows.filter(x=>x.status!=='Saved').length} awaiting review</small></div></div><div class="panel"><div class="menu-list">${menuCard('💬','Voice Conversation','Talk with LINGGUANG and receive spoken follow-up questions','voice-conversation')}${menuCard('🩺','Consultation Workspace','Patient-linked voice session','voice-consultation')}${menuCard('🧭','Voice Command','Open common modules by voice','voice-command')}${menuCard('🧠','Multi-AI Gateway','Voice and Scan provider routing','multi-ai-gateway')}${menuCard('📷','AI Scan','Medical document structured capture','ai-scan')}${menuCard('📊','AI Usage Ledger','Provider routing and usage history','ai-usage-ledger')}${menuCard('⚙️','AI Engine Settings','Choose Local, Hybrid or GPT Assist','ai-engine-settings')}${menuCard('✅','Review Center','Review and save voice drafts','voice-review')}</div></div><div class="notice">Build 010 adds a working voice conversation loop with spoken questions, speech input, typed fallback, context memory and reviewed summaries. Cloud language-model connection remains optional.</div>`}}
 async function voiceConsultationPage(){const d=readStore();return{title:'Consultation Workspace',subtitle:'Create a voice session',html:`${backBar('voice-ai','Voice AI')}${hero('Start Consultation','Select a patient and begin a reviewed session.')}<div class="panel"><form id="voice-start-form" class="form-grid"><label>Patient<select name="patientId" required><option value="">Select patient</option>${d.patients.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></label><label>Language<select name="language"><option value="en-CA">English</option><option value="zh-CN">中文</option><option value="yue-Hant-HK">粵語</option><option value="fr-CA">Français</option></select></label><label>Session Type<select name="sessionType"><option>Follow-up Consultation</option><option>Initial Consultation</option><option>Treatment Session</option></select></label><div class="form-action"><button class="button primary">Create Session</button></div></form></div>`,mount(){document.querySelector('#voice-start-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget)),p=d.patients.find(x=>x.id===v.patientId);if(!p)return toast('Select a patient');const s=voiceNewSession(p);s.language=v.language;s.sessionType=v.sessionType;voiceSaveSession(s);router.go(`voice-session?id=${s.id}`)}}}}
 async function voiceSessionPage(){const s=(readStore().voiceSessions||[]).find(x=>x.id===routeParams.get('id'));if(!s)return{title:'Voice Session',subtitle:'Not found',html:empty('Session not found')};return{title:'Voice Session',subtitle:s.patientName,html:`${backBar('voice-ai','Voice AI')}<section class="voice-session-banner"><div><span>${escapeHtml(s.code)}</span><h2>${escapeHtml(s.patientName)}</h2><p>${escapeHtml(s.sessionType||'Consultation')} · ${escapeHtml(s.doctor)}</p></div><div><b id="voice-state">Draft</b></div></section><div class="voice-workspace-grid"><section class="panel"><div class="panel-head"><h3>Live Transcript</h3><span>${SpeechRecognitionAPI?'Ready':'Typed fallback'}</span></div><label>Language<select id="voice-language"><option value="en-CA">English</option><option value="zh-CN">中文</option><option value="yue-Hant-HK">粵語</option><option value="fr-CA">Français</option></select></label><button type="button" class="voice-record-button" id="voice-record"><span>🎙</span><strong>Start Listening</strong><small>Tap to begin</small></button><textarea id="voice-transcript" rows="11" placeholder="Speak or type here">${escapeHtml(s.transcript||'')}</textarea><div class="button-row"><button class="button secondary" id="voice-command-test">Run as Command</button><button class="button primary" id="voice-soap">Generate SOAP Draft</button></div></section><section class="panel"><h3>Clinical Copilot</h3><div id="voice-copilot" class="voice-empty">Generate a draft to see documentation reminders.</div></section></div>`,mount(){let r=null,listening=false;const box=document.querySelector('#voice-transcript'),btn=document.querySelector('#voice-record'),lang=document.querySelector('#voice-language');lang.value=s.language||'en-CA';if(SpeechRecognitionAPI){r=new SpeechRecognitionAPI();r.continuous=true;r.interimResults=false;r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)box.value=(box.value+' '+e.results[i][0].transcript).trim();s.transcript=box.value;voiceSaveSession(s)};r.onend=()=>{if(listening)try{r.start()}catch{}}}btn.onclick=()=>{if(!r)return toast('Live browser speech unavailable. Type the transcript instead.');listening=!listening;r.lang=lang.value;try{listening?r.start():r.stop()}catch{}btn.classList.toggle('listening',listening);btn.querySelector('strong').textContent=listening?'Listening…':'Start Listening'};box.oninput=()=>{s.transcript=box.value;voiceSaveSession(s)};document.querySelector('#voice-command-test').onclick=()=>{const x=voiceIntent(box.value);if(x){toast(`Opening ${x[1]}`);router.go(x[0])}else toast('Clinical content detected. Generate a SOAP draft instead.')};document.querySelector('#voice-soap').onclick=()=>{s.transcript=box.value;if(!s.transcript.trim())return toast('Add transcript text first');s.soap=voiceSOAP(s.transcript);s.confidence=s.soap.confidence;s.status='Review';voiceSaveSession(s);router.go(`voice-review-session?id=${s.id}`)}}}}
 async function voiceReviewSessionPage(){const s=(readStore().voiceSessions||[]).find(x=>x.id===routeParams.get('id'));if(!s)return voiceReviewPage();const q=s.soap||voiceSOAP(s.transcript);return{title:'Voice Review',subtitle:s.patientName,html:`${backBar(`voice-session?id=${s.id}`,'Voice Session')}${hero('Review Before Saving','Edit every section. Nothing enters the clinical record until confirmed.')}<div class="panel"><form id="voice-review-form" class="form-grid"><label class="wide">Subjective<textarea name="subjective" rows="5">${escapeHtml(q.subjective||'')}</textarea></label><label class="wide">Objective<textarea name="objective" rows="4">${escapeHtml(q.objective||'')}</textarea></label><label class="wide">Assessment<textarea name="assessment" rows="4">${escapeHtml(q.assessment||'')}</textarea></label><label class="wide">Plan<textarea name="plan" rows="4">${escapeHtml(q.plan||'')}</textarea></label><div class="wide">${(q.missing||[]).map(x=>`<div class="voice-suggestion">⚠ ${escapeHtml(x)}</div>`).join('')}</div><div class="form-action"><button class="button primary">Confirm & Save Clinical Note</button></div></form></div>`,mount(){document.querySelector('#voice-review-form').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget));s.soap=v;s.status='Saved';s.confirmed=true;s.endedAt=new Date().toISOString();voiceSaveSession(s);updateStore(d=>d.clinicalNotes.push({id:crypto.randomUUID(),patientId:s.patientId,date:calendarTodayISO(),type:'Voice SOAP Note',note:`S: ${v.subjective}\n\nO: ${v.objective}\n\nA: ${v.assessment}\n\nP: ${v.plan}`,sessionId:s.id,createdAt:new Date().toISOString()}));toast('Voice note saved to Clinical');router.go(`patient-clinical?patient=${s.patientId}`)}}}}
@@ -821,7 +821,7 @@ async function voiceConversationPage(){
 }
 
 
-/* ===== Build 013 Clinical Voice Refinement Engine ===== */
+/* ===== Build 014 Multi-AI Voice + Scan Engine ===== */
 const LINGGUANG_VOICE_DIAG_KEY='lingguang-voice-diagnostics-v1';
 
 function voiceDiagSave(patch){
@@ -918,7 +918,7 @@ function voiceRecorderSupported(){
 
 
 
-/* ===== Build 013 Clinical Voice Refinement Engine ===== */
+/* ===== Build 014 Multi-AI Voice + Scan Engine ===== */
 const LINGGUANG_AI_MODE_KEY='lingguang-ai-mode-v1';
 const LINGGUANG_AI_ENDPOINT_KEY='lingguang-ai-endpoint-v1';
 
@@ -1082,7 +1082,7 @@ async function aiSettingsPage(){
 }
 
 
-/* ===== Build 013 Clinical Voice Refinement ===== */
+/* ===== Build 014 Multi-AI Voice + Scan ===== */
 const LINGGUANG_VOICE_PREF_KEY='lingguang-voice-refinement-v1';
 
 function getVoiceRefinementPrefs(){
@@ -1167,6 +1167,292 @@ function voiceRefinementSettingsHTML(){
     <label><input id="voice-confirm-low" type="checkbox" ${p.confirmLowConfidence?'checked':''}> Confirm unclear speech</label>
     <label><input id="voice-auto-correct" type="checkbox" ${p.autoCorrect?'checked':''}> Medical term correction</label>
   </div>`;
+}
+
+
+/* ===== Build 014 Multi-AI Gateway + Smart Scan ===== */
+const LG_GATEWAY_SETTINGS_KEY='lingguang-multi-ai-gateway-v1';
+const LG_AI_LEDGER_KEY='lingguang-ai-usage-ledger-v1';
+const LG_SCAN_HISTORY_KEY='lingguang-ai-scan-history-v1';
+
+function defaultGatewaySettings(){
+  return {
+    voiceProvider:'auto',
+    scanProvider:'auto',
+    gatewayEndpoint:getLingguangAIEndpoint()||'',
+    providers:{
+      gemini:{enabled:true,label:'Gemini'},
+      gpt:{enabled:true,label:'GPT'},
+      deepseek:{enabled:false,label:'DeepSeek (Reserved)'},
+      kimi:{enabled:false,label:'Kimi K3 (Reserved)'},
+      grok:{enabled:false,label:'Grok (Reserved)'}
+    }
+  };
+}
+function getGatewaySettings(){
+  try{
+    const stored=JSON.parse(localStorage.getItem(LG_GATEWAY_SETTINGS_KEY)||'null');
+    const base=defaultGatewaySettings();
+    return {...base,...(stored||{}),providers:{...base.providers,...((stored||{}).providers||{})}};
+  }catch{return defaultGatewaySettings()}
+}
+function saveGatewaySettings(next){
+  localStorage.setItem(LG_GATEWAY_SETTINGS_KEY,JSON.stringify(next));
+  if(next.gatewayEndpoint)setLingguangAIEndpoint(next.gatewayEndpoint);
+  return next;
+}
+function providerLabel(id){
+  const s=getGatewaySettings();
+  if(id==='auto')return 'Auto';
+  if(id==='local')return 'Local';
+  return s.providers[id]?.label||id;
+}
+function chooseAutoProvider(){
+  const s=getGatewaySettings();
+  if(s.providers.gemini?.enabled)return 'gemini';
+  if(s.providers.gpt?.enabled)return 'gpt';
+  return 'local';
+}
+function logAIUsage(entry){
+  let rows=[];
+  try{rows=JSON.parse(localStorage.getItem(LG_AI_LEDGER_KEY)||'[]')}catch{}
+  rows.unshift({id:`ai-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,at:new Date().toISOString(),...entry});
+  localStorage.setItem(LG_AI_LEDGER_KEY,JSON.stringify(rows.slice(0,300)));
+}
+function getAIUsageLedger(){
+  try{return JSON.parse(localStorage.getItem(LG_AI_LEDGER_KEY)||'[]')}catch{return[]}
+}
+async function gatewayCall(kind,payload,preferred){
+  const s=getGatewaySettings();
+  let provider=preferred||s[`${kind}Provider`]||'auto';
+  if(provider==='auto')provider=chooseAutoProvider();
+  if(provider==='local')return {provider:'local',local:true};
+
+  if(!s.gatewayEndpoint)throw new Error('Multi-AI Gateway endpoint not configured');
+
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),15000);
+  const started=Date.now();
+  try{
+    const res=await fetch(s.gatewayEndpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({product:'lingguang-health-os',task:kind,provider,payload}),
+      signal:controller.signal
+    });
+    if(!res.ok)throw new Error(`Gateway HTTP ${res.status}`);
+    const data=await res.json();
+    logAIUsage({kind,provider:data.provider||provider,status:'success',latencyMs:Date.now()-started});
+    return {...data,provider:data.provider||provider};
+  }catch(error){
+    logAIUsage({kind,provider,status:'fallback',latencyMs:Date.now()-started,error:error.message});
+    throw error;
+  }finally{clearTimeout(timer)}
+}
+function gatewayProviderSelect(id,value){
+  const options=[
+    ['auto','Auto (Gemini → GPT)'],
+    ['gemini','Gemini'],
+    ['gpt','GPT'],
+    ['deepseek','DeepSeek — Reserved'],
+    ['kimi','Kimi K3 — Reserved'],
+    ['grok','Grok — Reserved'],
+    ['local','Local only']
+  ];
+  return `<select id="${id}">${options.map(([v,l])=>`<option value="${v}" ${v===value?'selected':''}>${l}</option>`).join('')}</select>`;
+}
+
+async function multiAIGatewayPage(){
+  const s=getGatewaySettings();
+  return {title:'Multi-AI Gateway',subtitle:'Voice + Scan provider routing',html:`
+    ${backBar('voice-ai','Voice AI')}
+    ${hero('Multi-AI Gateway','Voice AI and AI Scan can choose providers independently. Auto uses Gemini first, then GPT.')}
+    <div class="gateway-grid">
+      <div class="panel"><h3>🎙 Voice AI</h3><label>Provider ${gatewayProviderSelect('gateway-voice-provider',s.voiceProvider)}</label></div>
+      <div class="panel"><h3>📷 AI Scan</h3><label>Provider ${gatewayProviderSelect('gateway-scan-provider',s.scanProvider)}</label></div>
+    </div>
+    <div class="panel">
+      <label>Secure Gateway Endpoint<input id="gateway-endpoint" type="url" value="${escapeHtml(s.gatewayEndpoint)}" placeholder="https://your-worker-or-edge-function.example/ai"></label>
+      <div class="notice">API keys stay on the server. Never place GPT/Gemini keys in this GitHub web app.</div>
+      <div class="button-row"><button class="button primary" id="save-gateway-settings">Save Gateway Settings</button></div>
+    </div>
+    <div class="panel"><h3>Provider Status</h3><div class="gateway-provider-list">
+      ${Object.entries(s.providers).map(([id,p])=>`<div><strong>${escapeHtml(p.label)}</strong><span>${p.enabled?'Ready':'Reserved'}</span></div>`).join('')}
+    </div></div>`,
+    mount(){
+      document.querySelector('#save-gateway-settings').onclick=()=>{
+        const next=getGatewaySettings();
+        next.voiceProvider=document.querySelector('#gateway-voice-provider').value;
+        next.scanProvider=document.querySelector('#gateway-scan-provider').value;
+        next.gatewayEndpoint=document.querySelector('#gateway-endpoint').value.trim();
+        saveGatewaySettings(next);
+        toast('Multi-AI Gateway settings saved');
+      };
+    }};
+}
+
+function scanLocalExtract(text){
+  const raw=String(text||'').trim();
+  const lower=raw.toLowerCase();
+  const fields={
+    documentType:/lab|laboratory|blood test|cbc|chemistry/i.test(raw)?'Lab / Diagnostic Report':
+      /prescription|rx|medication/i.test(raw)?'Medication / Prescription':
+      /referral|referred/i.test(raw)?'Referral':
+      /insurance|benefit|claim/i.test(raw)?'Insurance / Benefit Form':
+      /intake|medical history|patient form/i.test(raw)?'Patient Intake Form':'General Medical Document',
+    patientName:'',date:'',medications:[],conditions:[],symptoms:[],provider:'',notes:''
+  };
+  const dateMatch=raw.match(/\b(20\d{2}[-\/]\d{1,2}[-\/]\d{1,2}|[A-Z][a-z]{2,8}\s+\d{1,2},\s+20\d{2})\b/);
+  if(dateMatch)fields.date=dateMatch[1];
+  const knownMeds=['Ramipril','Ezetimibe','Mirabegron','Metformin','Amlodipine','Atorvastatin'];
+  fields.medications=knownMeds.filter(m=>lower.includes(m.toLowerCase()));
+  const knownConditions=['Diabetes','Arthritis','Hypertension','Neuropathy','Fibromyalgia','Migraine','Insomnia'];
+  fields.conditions=knownConditions.filter(c=>lower.includes(c.toLowerCase()));
+  const symptomWords=['pain','numbness','tingling','headache','dizziness','fatigue','sleep','stiffness'];
+  fields.symptoms=symptomWords.filter(x=>lower.includes(x));
+  fields.notes=raw.slice(0,700);
+  return fields;
+}
+function saveScanHistory(row){
+  let rows=[];
+  try{rows=JSON.parse(localStorage.getItem(LG_SCAN_HISTORY_KEY)||'[]')}catch{}
+  rows.unshift(row);
+  localStorage.setItem(LG_SCAN_HISTORY_KEY,JSON.stringify(rows.slice(0,100)));
+}
+function getScanHistory(){
+  try{return JSON.parse(localStorage.getItem(LG_SCAN_HISTORY_KEY)||'[]')}catch{return[]}
+}
+async function analyzeScanText(rawText){
+  const s=getGatewaySettings();
+  const preferred=s.scanProvider||'auto';
+  if(preferred==='local')return {provider:'local',fields:scanLocalExtract(rawText),confidence:72};
+  try{
+    const result=await gatewayCall('scan',{
+      text:rawText,
+      schema:{
+        documentType:'string',patientName:'string',date:'string',
+        medications:'string[]',conditions:'string[]',symptoms:'string[]',
+        provider:'string',notes:'string'
+      },
+      instruction:'Extract only information visible in the supplied medical document. Do not invent or diagnose.'
+    },preferred);
+    if(result.fields)return result;
+    throw new Error('Gateway returned no structured fields');
+  }catch(error){
+    return {provider:'local',fallback:true,fallbackReason:error.message,fields:scanLocalExtract(rawText),confidence:68};
+  }
+}
+
+async function aiScanPage(){
+  const s=getGatewaySettings();
+  const rows=getScanHistory();
+  return {title:'AI Scan',subtitle:'Medical document structured capture',html:`
+    ${backBar('today','Dashboard')}
+    ${hero('LINGGUANG AI Scan','Capture a medical document, review extracted information, then choose where it should go.')}
+    <div class="scan-layout">
+      <section class="panel">
+        <div class="scan-toolbar">
+          <label>AI Provider ${gatewayProviderSelect('scan-provider-inline',s.scanProvider)}</label>
+          <label class="scan-file-button">📷 Camera / Photo<input id="scan-file-input" type="file" accept="image/*" capture="environment"></label>
+        </div>
+        <div id="scan-preview-wrap" class="scan-preview-wrap"><div class="scan-empty">Take a photo or paste the document text below.</div></div>
+        <label>Recognized / Pasted Text<textarea id="scan-raw-text" rows="10" placeholder="Paste text here for testing, or use the camera/photo picker."></textarea></label>
+        <div class="button-row"><button class="button primary" id="scan-analyze">Analyze Document</button><button class="button secondary" id="scan-clear">Clear</button></div>
+        <div id="scan-status" class="notice">Ready.</div>
+      </section>
+      <aside class="panel"><h3>Structured Result</h3><div id="scan-result" class="scan-result-empty">No scan analyzed yet.</div></aside>
+    </div>
+    <div class="panel"><h3>Recent Scan History</h3>
+      ${rows.length?rows.slice(0,8).map(r=>`<button class="application-list-row"><div><strong>${escapeHtml(r.fields.documentType||'Medical Document')}</strong><small>${new Date(r.createdAt).toLocaleString()} · ${escapeHtml(providerLabel(r.provider))}</small></div><span>›</span></button>`).join(''):empty('No AI Scan history yet.')}
+    </div>`,
+    mount(){
+      const file=document.querySelector('#scan-file-input');
+      const preview=document.querySelector('#scan-preview-wrap');
+      const raw=document.querySelector('#scan-raw-text');
+      const result=document.querySelector('#scan-result');
+      const status=document.querySelector('#scan-status');
+      const inline=document.querySelector('#scan-provider-inline');
+      inline.onchange=()=>{const next=getGatewaySettings();next.scanProvider=inline.value;saveGatewaySettings(next)};
+      file.onchange=()=>{
+        const f=file.files?.[0]; if(!f)return;
+        const url=URL.createObjectURL(f);
+        preview.innerHTML=`<img src="${url}" alt="Medical document preview"><div class="notice">Photo loaded. Cloud vision requires the configured gateway.</div>`;
+      };
+      document.querySelector('#scan-clear').onclick=()=>{
+        raw.value=''; result.innerHTML='No scan analyzed yet.';
+        preview.innerHTML='<div class="scan-empty">Take a photo or paste the document text below.</div>';
+        status.textContent='Ready.';
+      };
+      document.querySelector('#scan-analyze').onclick=async()=>{
+        const text=raw.value.trim();
+        if(!text){status.textContent='Paste document text or configure the secure image-to-text gateway.';return}
+        status.textContent='Analyzing…';
+        const analyzed=await analyzeScanText(text);
+        const f=analyzed.fields||{};
+        result.innerHTML=`
+          <div class="scan-provider-line">${aiSourceBadge(analyzed.provider==='gpt'?'gpt':analyzed.provider==='gemini'?'hybrid':'local')}<span>${escapeHtml(providerLabel(analyzed.provider))}${analyzed.fallback?' · Local fallback':''}</span></div>
+          <div class="scan-field"><span>Document Type</span><strong>${escapeHtml(f.documentType||'—')}</strong></div>
+          <div class="scan-field"><span>Patient</span><strong>${escapeHtml(f.patientName||'—')}</strong></div>
+          <div class="scan-field"><span>Date</span><strong>${escapeHtml(f.date||'—')}</strong></div>
+          <div class="scan-field"><span>Medications</span><strong>${escapeHtml((f.medications||[]).join(', ')||'—')}</strong></div>
+          <div class="scan-field"><span>Conditions</span><strong>${escapeHtml((f.conditions||[]).join(', ')||'—')}</strong></div>
+          <div class="scan-field"><span>Symptoms</span><strong>${escapeHtml((f.symptoms||[]).join(', ')||'—')}</strong></div>
+          <div class="scan-field"><span>Provider</span><strong>${escapeHtml(f.provider||'—')}</strong></div>
+          <label>Notes<textarea id="scan-edit-notes" rows="5">${escapeHtml(f.notes||'')}</textarea></label>
+          <div class="button-row">
+            <button class="button primary" id="scan-confirm-save">Confirm & Save</button>
+            <button class="button secondary" id="scan-send-application">Send to Application</button>
+            <button class="button secondary" id="scan-send-clinical">Send to Clinical Draft</button>
+          </div>`;
+        status.textContent=analyzed.fallback?`Gateway unavailable; Local fallback used (${analyzed.fallbackReason}).`:`Analyzed with ${providerLabel(analyzed.provider)}. Review before saving.`;
+
+        const save=target=>{
+          f.notes=document.querySelector('#scan-edit-notes')?.value||f.notes||'';
+          const row={id:`scan-${Date.now()}`,createdAt:new Date().toISOString(),provider:analyzed.provider||'local',target,fields:f,rawText:text};
+          saveScanHistory(row);
+          toast(target==='history'?'Scan saved':`Scan sent to ${target}`);
+          if(target==='clinical'){
+            const d=readStore(),patient=d.patients[0];
+            if(patient){
+              updateStore(store=>store.clinicalNotes.push({
+                id:crypto.randomUUID(),patientId:patient.id,date:calendarTodayISO(),type:'AI Scan Draft',
+                note:`Document: ${f.documentType}\nDate: ${f.date||''}\nMedications: ${(f.medications||[]).join(', ')}\nConditions: ${(f.conditions||[]).join(', ')}\nSymptoms: ${(f.symptoms||[]).join(', ')}\nNotes: ${f.notes||''}`,
+                createdAt:new Date().toISOString(),draft:true
+              }));
+            }
+          }
+          if(target==='application'){
+            const d=readStore(),u=platformUser(),p=d.patients.find(x=>x.id===u.patientId)||d.patients[0];
+            if(p){
+              updateStore(store=>store.applications.push({
+                id:crypto.randomUUID(),patientId:p.id,patientName:p.name,createdAt:new Date().toISOString(),
+                status:'Waiting Review',concern:'AI Scan Document',service:'Document Review',
+                description:`${f.documentType}: ${f.notes||''}`,preferredDate:'',preferredTime:'Any time',
+                filesNote:'AI Scan structured import',aiSummary:f.notes||'',aiMode:'ai-scan',missingQuestions:[],reviewNote:''
+              }));
+            }
+          }
+        };
+        document.querySelector('#scan-confirm-save').onclick=()=>save('history');
+        document.querySelector('#scan-send-application').onclick=()=>save('application');
+        document.querySelector('#scan-send-clinical').onclick=()=>save('clinical');
+      };
+    }};
+}
+
+async function aiUsageLedgerPage(){
+  const rows=getAIUsageLedger();
+  return {title:'AI Usage Ledger',subtitle:'Voice + Scan gateway history',html:`
+    ${backBar('multi-ai-gateway','Multi-AI Gateway')}
+    ${hero('AI Usage Ledger','Review which AI provider handled Voice and Scan requests.')}
+    <div class="panel">
+      ${rows.length?rows.map(r=>`<div class="ledger-row">
+        <div><strong>${escapeHtml((r.kind||'AI').toUpperCase())}</strong><small>${new Date(r.at).toLocaleString()}</small></div>
+        <span>${escapeHtml(providerLabel(r.provider||'local'))}</span>
+        <span>${escapeHtml(r.status||'')}</span>
+        <span>${r.latencyMs?`${r.latencyMs} ms`:'—'}</span>
+      </div>`).join(''):empty('No cloud AI usage recorded yet.')}
+    </div>`};
 }
 
 function mountVoiceConversation(convo){
@@ -2250,7 +2536,7 @@ async function settingsPage(){
 }
 async function settingsInfoPage(){
  const kind=currentRouteInfo().route;
- const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 013 Clinical Voice Refinement · Booking Calendar Build 002 · Local AI Beta 001.';
+ const copy=kind==='settings-language'?'Language switching will be connected after all clinical wording is finalized.':kind==='settings-privacy'?'This build stores records only in the current browser. It is not yet a production medical-record system.':'LINGGUANG Health OS · Voice AI Build 014 Multi-AI Voice + Scan · Booking Calendar Build 002 · Local AI Beta 001.';
  return {title:'Settings',subtitle:'Information',html:`${backBar('settings','Settings')}${hero('System Information',copy)}`};
 }
 
@@ -2418,12 +2704,13 @@ function shell(){
           <button data-route="patients">👥 Patients</button>
           <button data-route="clinical">🩺 Clinical</button>
           <button data-route="ai-care">🤖 AI Care</button>
+          <button data-route="ai-scan">📷 AI Scan</button>
           <button data-route="voice-ai">🎙 Voice AI</button>
           <button data-route="health-journey">📈 Health Journey</button>
           <button data-route="clinic">🏥 Clinic</button>
           <button data-route="settings">⚙️ Settings</button>
         </nav>
-        <div class="build-label">Voice AI Build 013 Clinical Voice Refinement</div>
+        <div class="build-label">Voice AI Build 014 Multi-AI Voice + Scan</div>
       </aside>
       <main class="workspace">
         <header class="workspace-header">
@@ -2506,7 +2793,7 @@ const routes={
   'application-review':applicationReviewPage,'application-schedule':applicationSchedulePage,
   'admin-portal':adminPortalPage,'admin-staff':adminPlaceholderPage,'admin-rooms':adminPlaceholderPage,
   'admin-services':adminPlaceholderPage,'admin-hours':adminPlaceholderPage,'clinic-create':adminPlaceholderPage,
-  'voice-ai':voiceAIPage,'ai-engine-settings':aiSettingsPage,'voice-conversation':voiceConversationPage,'voice-consultation':voiceConsultationPage,'voice-session':voiceSessionPage,'voice-review-session':voiceReviewSessionPage,'voice-command':voiceCommandPage,'voice-review':voiceReviewPage,'voice-patient':voicePatientPage,
+  'voice-ai':voiceAIPage,'multi-ai-gateway':multiAIGatewayPage,'ai-scan':aiScanPage,'ai-usage-ledger':aiUsageLedgerPage,'ai-engine-settings':aiSettingsPage,'voice-conversation':voiceConversationPage,'voice-consultation':voiceConsultationPage,'voice-session':voiceSessionPage,'voice-review-session':voiceReviewSessionPage,'voice-command':voiceCommandPage,'voice-review':voiceReviewPage,'voice-patient':voicePatientPage,
   today:todayPage,patients:patientsPage,'patient-new':patientNewPage,'patient-list':patientListPage,
   'patient-archived':patientArchivedPage,'patient-detail':patientDetailPage,'patient-basic':patientBasicPage,
   'patient-bookings':patientBookingsPage,'patient-clinical':patientClinicalPage,'patient-ai':patientAiPage,
@@ -2534,7 +2821,7 @@ function allowedForRole(route,role){
 }
 function parentRoute(route,params){
   const patient=params.get('patient'),pd=patient?`patient-detail?patient=${patient}`:'patient-list';
-  const map={'role-login':'platform-entry','patient-portal':'platform-entry','patient-application-new':'patient-portal','patient-applications':'patient-portal','patient-appointments':'patient-portal','patient-my-journey':'patient-portal','patient-upload':'patient-portal','patient-messages':'patient-portal','patient-my-profile':'patient-portal',applications:'booking','applications-waiting':'applications','applications-more-info':'applications','applications-approved':'applications','applications-scheduled':'applications','applications-all':'applications','application-review':'applications','application-schedule':'application-review','admin-portal':'platform-entry','admin-staff':'admin-portal','admin-rooms':'admin-portal','admin-services':'admin-portal','admin-hours':'admin-portal','clinic-create':'platform-entry','voice-ai':'today','ai-engine-settings':'voice-ai','voice-conversation':'voice-ai','voice-consultation':'voice-ai','voice-session':'voice-ai','voice-review-session':'voice-review','voice-command':'voice-ai','voice-review':'voice-ai','voice-patient':'patient-portal',today:null,patients:'today','patient-new':'patients','patient-list':'patients','patient-archived':'patients','patient-detail':'patient-list','patient-basic':pd,'patient-bookings':pd,'patient-clinical':pd,'patient-ai':pd,'patient-journey':pd,'patient-remote':pd,'patient-documents':pd,booking:'today','booking-calendar':'booking','booking-new':'booking-calendar','booking-pending':'booking','booking-confirmed':'booking','booking-history':'booking',clinical:'today','clinical-new':'clinical','clinical-notes':'clinical','clinical-today':'clinical','ai-care':'today','ai-intake':'ai-care',intake:'ai-intake','ai-conversation':'ai-intake','clinical-summary':'ai-care','health-analysis':'ai-care','remote-care':'ai-care','follow-up':'ai-care','risk-review':'ai-care','health-journey':'today',clinic:'today',settings:'today','settings-local-ai':'settings','settings-local-ai-privacy':'settings-local-ai','settings-language':'settings','settings-privacy':'settings','settings-about':'settings'};
+  const map={'role-login':'platform-entry','patient-portal':'platform-entry','patient-application-new':'patient-portal','patient-applications':'patient-portal','patient-appointments':'patient-portal','patient-my-journey':'patient-portal','patient-upload':'patient-portal','patient-messages':'patient-portal','patient-my-profile':'patient-portal',applications:'booking','applications-waiting':'applications','applications-more-info':'applications','applications-approved':'applications','applications-scheduled':'applications','applications-all':'applications','application-review':'applications','application-schedule':'application-review','admin-portal':'platform-entry','admin-staff':'admin-portal','admin-rooms':'admin-portal','admin-services':'admin-portal','admin-hours':'admin-portal','clinic-create':'platform-entry','voice-ai':'today','multi-ai-gateway':'voice-ai','ai-scan':'today','ai-usage-ledger':'multi-ai-gateway','ai-engine-settings':'voice-ai','voice-conversation':'voice-ai','voice-consultation':'voice-ai','voice-session':'voice-ai','voice-review-session':'voice-review','voice-command':'voice-ai','voice-review':'voice-ai','voice-patient':'patient-portal',today:null,patients:'today','patient-new':'patients','patient-list':'patients','patient-archived':'patients','patient-detail':'patient-list','patient-basic':pd,'patient-bookings':pd,'patient-clinical':pd,'patient-ai':pd,'patient-journey':pd,'patient-remote':pd,'patient-documents':pd,booking:'today','booking-calendar':'booking','booking-new':'booking-calendar','booking-pending':'booking','booking-confirmed':'booking','booking-history':'booking',clinical:'today','clinical-new':'clinical','clinical-notes':'clinical','clinical-today':'clinical','ai-care':'today','ai-intake':'ai-care',intake:'ai-intake','ai-conversation':'ai-intake','clinical-summary':'ai-care','health-analysis':'ai-care','remote-care':'ai-care','follow-up':'ai-care','risk-review':'ai-care','health-journey':'today',clinic:'today',settings:'today','settings-local-ai':'settings','settings-local-ai-privacy':'settings-local-ai','settings-language':'settings','settings-privacy':'settings','settings-about':'settings'};
   return map[route]??roleHome();
 }
 async function render(){

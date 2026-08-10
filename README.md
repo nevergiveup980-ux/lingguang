@@ -1,14 +1,33 @@
-# LINGGUANG Health OS — Build 013 Clinical Voice Refinement
+# LINGGUANG Health OS — Build 014 Multi-AI Voice + Scan
 
-Transfers the fine-grained RUNLU/Warehouse OS voice ideas into LINGGUANG:
+Inspired by the latest RUNLU Warehouse OS intelligent voice + intelligent scan architecture.
 
-- Auto Chinese/English detection
-- Reply in the user's current language
+## Multi-AI Gateway
+- Voice AI and AI Scan choose providers independently.
+- Auto = Gemini → GPT.
+- DeepSeek, Kimi K3 and Grok are reserved provider slots.
+- Secure gateway endpoint only.
+
+## Voice AI
+Preserves:
+- iPhone multi-turn fixes
+- Auto language detection
 - Medical term correction
-- Low-confidence confirmation: Yes / Edit / Speak again
-- Voice command vs clinical-content separation
-- Local / Hybrid / GPT Assist routing preserved
-- iPhone multi-turn speech fix preserved
-- Clear Listening / Thinking / Speaking states preserved
+- Low-confidence confirmation
+- Voice command / clinical-content separation
+- Local / Hybrid / GPT Assist
 
-Voice commands can open today's calendar, patients, consultation, clinical notes, and pending applications.
+## AI Scan
+- Camera / photo picker
+- Text testing area
+- Structured extraction:
+  document type, patient, date, medications, conditions, symptoms, provider, notes
+- Local fallback
+- Review before save
+- Send to Application or Clinical Draft
+- Scan history
+
+## AI Usage Ledger
+Tracks provider, task, status and latency.
+
+Image-to-text cloud vision requires the secure gateway. Without it, pasted text can still be tested locally.
