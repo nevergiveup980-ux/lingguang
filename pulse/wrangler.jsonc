@@ -4,13 +4,7 @@
   "main": "src/index.js",
   "compatibility_date": "2026-08-16",
   "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": false,
-  "routes": [
-    {
-      "pattern": "pulse.lingguanghealth.com",
-      "custom_domain": true
-    }
-  ],
+  "workers_dev": true,
   "vars": {
     "LINGGUANG_HOST": "lingguanghealth.com",
     "LINGGUANG_HOME_COUNTRY": "CA"
