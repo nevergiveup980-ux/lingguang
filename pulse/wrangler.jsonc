@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lingguang-pulse",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "vars": {
+    "LINGGUANG_HOST": "lingguanghealth.com",
+    "LINGGUANG_HOME_COUNTRY": "CA"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "secrets": {
+    "required": [
+      "CF_ANALYTICS_TOKEN",
+      "CF_ACCOUNT_ID"
+    ]
+  }
+}
